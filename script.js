@@ -526,6 +526,7 @@ function nextRound(){
 
   renderGameFromState();
   startTimer();
+  syncOnlineState();
 }
 
 function resolveUnaffordableRound(featured, position){
@@ -821,7 +822,8 @@ function simulateGoals(avgRating){
   return goals;
 }
 
-$("#btn-replay").addEventListener("click", () => {
+function resetToHome(){
+  clearInterval(timerId);
   detachRoomListeners();
   clearOnlineSession();
   onlineRole = null; roomCode = null; roomRef = null;
@@ -832,6 +834,14 @@ $("#btn-replay").addEventListener("click", () => {
   $("#input-p2").value = "";
   selectedMode = null;
   state = null;
+}
+
+$("#btn-replay").addEventListener("click", resetToHome);
+
+$("#btn-game-home").addEventListener("click", () => {
+  const inGame = state && state.round > 0 && state.status !== "finished";
+  if (inGame && !confirm("هتخرج من المزاد الحالي وتتفقد كل التقدم — متأكد؟")) return;
+  resetToHome();
 });
 
 tryResumeSession();
