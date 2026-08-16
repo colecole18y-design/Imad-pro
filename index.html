@@ -35,8 +35,31 @@
 
   <main id="app">
 
-    <!-- ===================== HOME SCREEN ===================== -->
-    <section class="screen active" id="screen-home">
+    <!-- ===================== GAME TYPE SELECTION SCREEN ===================== -->
+    <section class="screen active" id="screen-choose-game">
+      <div class="card hero-card">
+        <span class="eyebrow">IMAD PRO</span>
+        <h2>🎮 اختر نوع اللعبة</h2>
+        <p class="muted">لعبتين مختلفتين لعشاق الكورة — جرّب أي واحدة فيهم.</p>
+      </div>
+
+      <div class="option-grid" id="game-type-grid">
+        <button class="option-card option-card-wide" data-game="auction">
+          <span class="opt-icon">⚽</span>
+          <span class="opt-title">مزاد النجوم</span>
+          <span class="opt-desc">مزاد على 11 لاعبًا — كوّن تشكيلتك ضد خصمك</span>
+        </button>
+        <button class="option-card option-card-wide" data-game="guess">
+          <span class="opt-icon">💰</span>
+          <span class="opt-title">راجع سعرك</span>
+          <span class="opt-desc">خمّن سعر انتقال اللاعب الحقيقي واكسب نقط على دقتك</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===================== HOME SCREEN (auction: mode + name) ===================== -->
+    <section class="screen" id="screen-home">
+      <button class="btn btn-ghost btn-top-back" id="btn-home-back">‹ رجوع لاختيار اللعبة</button>
       <div class="card hero-card">
         <span class="eyebrow">ابدأ مزادك</span>
         <h2>اختر طريقة اللعب</h2>
@@ -159,7 +182,12 @@
       <div class="card">
         <span class="eyebrow">التصنيف العام</span>
         <h2>🏆 لوحة الترتيب</h2>
-        <p class="muted">فوز = +3 نقاط · تعادل = +1 نقطة · خسارة = -2 نقطة</p>
+        <p class="muted" id="leaderboard-sub">فوز = +3 نقاط · تعادل = +1 نقطة · خسارة = -2 نقطة</p>
+      </div>
+
+      <div class="tab-row">
+        <button class="tab-btn active" id="tab-lb-auction" data-lb="auction">🏆 نقاط المزاد</button>
+        <button class="tab-btn" id="tab-lb-guess" data-lb="guess">💰 أفضل تخمين</button>
       </div>
 
       <div class="card">
@@ -169,6 +197,97 @@
       </div>
 
       <button class="btn btn-ghost" id="btn-leaderboard-back">‹ رجوع</button>
+    </section>
+
+    <!-- ===================== GUESS-THE-PRICE: SETUP ===================== -->
+    <section class="screen" id="screen-guess-setup">
+      <div class="card">
+        <span class="eyebrow">راجع سعرك</span>
+        <h2>💰 قد إيه تعرف أسعار النجوم؟</h2>
+        <p class="muted">هيتعرض عليك لاعب واحد كل مرة، وانت تحاول تحزر سعره الحقيقي بالمليون — قد ما تكون قريب من الرقم، قد ما تكسب نقط أكتر.</p>
+      </div>
+
+      <div class="card form-card">
+        <label class="field">
+          <span>اسمك <em>(إجباري)</em></span>
+          <input type="text" id="guess-input-name" maxlength="16" placeholder="مثلاً: عماد">
+        </label>
+        <p class="error-msg" id="guess-setup-error" hidden></p>
+      </div>
+
+      <div class="card">
+        <h3 class="section-title">🔢 عدد الجولات</h3>
+        <div class="pill-group" id="guess-rounds-group">
+          <button class="pill" data-rounds="5">
+            <strong>5 لاعبين</strong><small>تحدي سريع</small>
+          </button>
+          <button class="pill" data-rounds="10">
+            <strong>10 لاعبين</strong><small>تحدي متوسط</small>
+          </button>
+          <button class="pill" data-rounds="20">
+            <strong>20 لاعب</strong><small>التحدي الكامل</small>
+          </button>
+        </div>
+      </div>
+
+      <div class="actions-row">
+        <button class="btn btn-ghost" id="btn-guess-setup-back">‹ رجوع</button>
+        <button class="btn btn-gold btn-block" id="btn-guess-start">ابدأ التحدي</button>
+      </div>
+    </section>
+
+    <!-- ===================== GUESS-THE-PRICE: GAME ===================== -->
+    <section class="screen" id="screen-guess-game">
+      <div class="game-topbar">
+        <button class="icon-btn" id="btn-guess-home" title="رجوع للرئيسية">🏠</button>
+        <div class="round-chip">لاعب <span id="guess-round-num">1</span> / <span id="guess-round-total">10</span></div>
+        <div class="pos-chip" id="guess-score-chip">0 نقطة</div>
+      </div>
+
+      <div class="card spotlight-card">
+        <span class="eyebrow">قد إيه سعره الحقيقي؟</span>
+        <div class="player-jersey" id="guess-player-jersey">⚽</div>
+        <h2 class="player-name" id="guess-player-name">—</h2>
+        <p class="player-club" id="guess-player-club">—</p>
+        <div class="player-meta">
+          <span class="badge" id="guess-player-pos-badge">—</span>
+          <span class="stat-chip">⚡ الطاقة: <strong id="guess-player-rating">0</strong></span>
+        </div>
+
+        <div class="guess-input-wrap" id="guess-input-wrap">
+          <span class="bid-label">تخمينك (مليون)</span>
+          <div class="guess-stepper">
+            <button class="btn btn-bid" data-step="-10">−10</button>
+            <button class="btn btn-bid" data-step="-1">−1</button>
+            <input type="number" id="guess-value-input" min="0" max="300" value="20" inputmode="numeric">
+            <button class="btn btn-bid" data-step="1">+1</button>
+            <button class="btn btn-bid" data-step="10">+10</button>
+          </div>
+          <button class="btn btn-gold btn-block" id="btn-guess-submit">✅ تأكيد التخمين</button>
+        </div>
+
+        <div class="guess-reveal" id="guess-reveal" hidden>
+          <p class="guess-actual">السعر الحقيقي: <strong id="guess-actual-price">0</strong> مليون</p>
+          <p class="guess-score-line" id="guess-score-line">حصلت على 0 نقطة</p>
+          <button class="btn btn-gold btn-block" id="btn-guess-next">التالي ›</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== GUESS-THE-PRICE: RESULT ===================== -->
+    <section class="screen" id="screen-guess-result">
+      <div class="card result-hero">
+        <span class="eyebrow">انتهى التحدي</span>
+        <h2>💰 نتيجتك النهائية</h2>
+        <div class="score-board">
+          <div class="score-side">
+            <span class="score-name" id="guess-res-name">—</span>
+            <span class="score-num" id="guess-res-total">0</span>
+          </div>
+        </div>
+        <p class="winner-line" id="guess-res-line">—</p>
+      </div>
+      <button class="btn btn-gold btn-block" id="btn-guess-replay">🔄 العب تاني</button>
     </section>
 
     <!-- ===================== GAME SCREEN ===================== -->
@@ -289,7 +408,7 @@
         <span class="link-text">تابعنا على إنستغرام</span>
         <span class="link-arrow">‹</span>
       </a>
-      <a class="link-row" href="https://www.facebook.com/profile.php?id=61556641468455" target="_blank" rel="noopener">
+      <a class="link-row" href="https://github.com/your-username/your-repo" target="_blank" rel="noopener">
         <span class="link-icon">💻</span>
         <span class="link-text">الكود المصدري</span>
         <span class="link-arrow">‹</span>
