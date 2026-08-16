@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#071a12">
+<title>IMAD PRO ⚽</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+</head>
+<body>
+
+<div class="stadium-bg" aria-hidden="true">
+  <div class="floodlight fl-1"></div>
+  <div class="floodlight fl-2"></div>
+  <div class="pitch-lines"></div>
+  <div class="grain"></div>
+</div>
+
+<div class="app-shell">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-badge">⚽</span>
+      <div class="brand-text">
+        <h1>IMAD <span>PRO</span></h1>
+        <p>مزاد النجوم — كوّن تشكيلتك من 11 لاعبًا</p>
+      </div>
+    </div>
+  </header>
+
+  <main id="app">
+
+    <!-- ===================== HOME SCREEN ===================== -->
+    <section class="screen active" id="screen-home">
+      <div class="card hero-card">
+        <span class="eyebrow">ابدأ مزادك</span>
+        <h2>اختر طريقة اللعب</h2>
+        <p class="muted">مزايدة تنافسية لبناء أقوى تشكيلة قبل خصمك — كل جولة نجم واحد، والصامد يفوز به.</p>
+      </div>
+
+      <div class="option-grid" id="mode-grid">
+        <button class="option-card" data-mode="ai">
+          <span class="opt-icon">🤖</span>
+          <span class="opt-title">سولو ضد الحاسوب</span>
+          <span class="opt-desc">تحدَّ الذكاء الاصطناعي وابنِ تشكيلتك بنفسك</span>
+        </button>
+        <button class="option-card" data-mode="local">
+          <span class="opt-icon">👥</span>
+          <span class="opt-title">لاعبان على نفس الجهاز</span>
+          <span class="opt-desc">تبارز صاحبك مزايدة بمزايدة على نفس الشاشة</span>
+        </button>
+        <button class="option-card option-card-wide" data-mode="online">
+          <span class="opt-icon">🌐</span>
+          <span class="opt-title">غرفة أونلاين</span>
+          <span class="opt-desc">العب مع صاحبك من جهازين مختلفين برمز غرفة</span>
+        </button>
+      </div>
+
+      <div class="card form-card">
+        <label class="field">
+          <span>اسمك <em>(إجباري)</em></span>
+          <input type="text" id="input-p1" maxlength="16" placeholder="مثلاً: عماد">
+        </label>
+        <label class="field" id="field-p2" hidden>
+          <span>اسم اللاعب الثاني</span>
+          <input type="text" id="input-p2" maxlength="16" placeholder="اسم صاحبك">
+        </label>
+        <p class="error-msg" id="home-error" hidden></p>
+        <button class="btn btn-gold btn-block" id="btn-to-setup">التالي ›</button>
+      </div>
+    </section>
+
+    <!-- ===================== SETUP SCREEN ===================== -->
+    <section class="screen" id="screen-setup">
+      <div class="card">
+        <span class="eyebrow">قبل البداية</span>
+        <h2>⚙️ ضبط إعدادات المزاد</h2>
+      </div>
+
+      <div class="card">
+        <h3 class="section-title">🎯 مستوى الصعوبة</h3>
+        <div class="pill-group" id="difficulty-group">
+          <button class="pill" data-diff="easy" data-color="green">
+            <strong>سهل</strong><small>نجوم عالميون معروفون</small>
+          </button>
+          <button class="pill" data-diff="medium" data-color="amber">
+            <strong>متوسط</strong><small>لاعبون معروفون</small>
+          </button>
+          <button class="pill" data-diff="hard" data-color="red">
+            <strong>صعب</strong><small>أسماء أقل شهرة وأدق</small>
+          </button>
+        </div>
+        <p class="hint">💡 الأسعار قيم تقريبية داخل اللعبة، وليست بيانات سوق مباشرة.</p>
+      </div>
+
+      <div class="card">
+        <h3 class="section-title">⏱️ وقت التفكير لكل عرض</h3>
+        <div class="slider-row">
+          <input type="range" id="slider-timer" min="0" max="30" step="5" value="20">
+          <span class="slider-val" id="val-timer">20 ث</span>
+        </div>
+        <p class="hint">اسحب لأقصى اليسار لتعطيل التايمر تمامًا</p>
+      </div>
+
+      <div class="card">
+        <h3 class="section-title">💰 ميزانية كل فريق</h3>
+        <div class="slider-row">
+          <input type="range" id="slider-budget" min="50" max="1000" step="10" value="500">
+          <span class="slider-val" id="val-budget">500 م</span>
+        </div>
+      </div>
+
+      <div class="actions-row">
+        <button class="btn btn-ghost" id="btn-setup-back">‹ رجوع</button>
+        <button class="btn btn-gold btn-block" id="btn-start-auction">بدء المزاد</button>
+      </div>
+    </section>
+
+    <!-- ===================== ONLINE ROOM SCREEN ===================== -->
+    <section class="screen" id="screen-online">
+      <div class="card">
+        <span class="eyebrow">غرفة أونلاين</span>
+        <h2>🌐 العب مع صاحبك عن بُعد</h2>
+        <p class="muted">واحد يعمل غرفة ويشارك الرمز مع صاحبه، والتاني يدخل بنفس الرمز من جهازه.</p>
+      </div>
+
+      <div class="card" id="online-idle-card">
+        <button class="btn btn-gold btn-block" id="btn-create-room">➕ إنشاء غرفة جديدة</button>
+        <p class="or-sep">— أو —</p>
+        <div class="join-row">
+          <input type="text" id="input-join-code" maxlength="6" placeholder="اكتب رمز الغرفة">
+          <button class="btn btn-bid" id="btn-join-room">دخول ➜</button>
+        </div>
+      </div>
+
+      <div class="card" id="online-host-card" hidden>
+        <span class="eyebrow">رمز غرفتك — شاركه مع صاحبك</span>
+        <div class="room-code" id="room-code-display">—</div>
+        <button class="btn btn-ghost btn-block" id="btn-copy-code">📋 نسخ الرمز</button>
+        <p class="waiting-line" id="host-wait-line">⏳ بانتظار الطرف التاني ينضم…</p>
+      </div>
+
+      <div class="card" id="online-guest-card" hidden>
+        <p class="waiting-line" id="guest-wait-line">⏳ بانتظار المضيف يبدأ المزاد…</p>
+      </div>
+
+      <p class="error-msg" id="online-error" hidden></p>
+
+      <button class="btn btn-ghost" id="btn-online-back">‹ رجوع</button>
+    </section>
+
+    <!-- ===================== GAME SCREEN ===================== -->
+    <section class="screen" id="screen-game">
+
+      <div class="game-topbar">
+        <div class="round-chip">الجولة <span id="round-num">1</span> / <span id="round-total">11</span></div>
+        <div class="pos-chip" id="pos-chip">GK</div>
+      </div>
+
+      <div class="card spotlight-card">
+        <span class="eyebrow">تحت المزاد الآن</span>
+        <div class="player-jersey" id="player-jersey">⚽</div>
+        <h2 class="player-name" id="player-name">—</h2>
+        <div class="player-meta">
+          <span class="badge" id="player-pos-badge">—</span>
+          <span class="base-price">السعر الأساسي: <strong id="player-base">0</strong> م</span>
+        </div>
+
+        <div class="bid-display">
+          <span class="bid-label">العرض الحالي</span>
+          <span class="bid-amount" id="current-bid">0</span>
+          <span class="bid-unit">مليون</span>
+        </div>
+        <p class="bidder-line" id="bidder-line">لا يوجد عرض بعد</p>
+
+        <div class="timer-wrap" id="timer-wrap">
+          <div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div>
+          <span class="timer-num" id="timer-num">20</span>
+        </div>
+
+        <p class="turn-line" id="turn-line">دور: —</p>
+        <p class="role-hint" id="role-hint" hidden></p>
+        <p class="warn-line" id="warn-line" hidden></p>
+
+        <div class="bid-controls" id="bid-controls">
+          <button class="btn btn-bid" data-amt="1">➕ مليون</button>
+          <button class="btn btn-bid" data-amt="5">➕ خمسة</button>
+          <button class="btn btn-bid" data-amt="10">➕ عشرة</button>
+        </div>
+        <button class="btn btn-surrender" id="btn-surrender" disabled>🏳️ تسليم للخصم</button>
+      </div>
+
+      <div class="squads-wrap">
+        <div class="squad-panel" id="squad-panel-1">
+          <div class="squad-head">
+            <span class="squad-name" id="squad1-name">فريق 1</span>
+            <span class="squad-budget"><span id="squad1-budget">500</span> م متبقي</span>
+          </div>
+          <div class="squad-slots" id="squad1-slots"></div>
+        </div>
+        <div class="squad-panel" id="squad-panel-2">
+          <div class="squad-head">
+            <span class="squad-name" id="squad2-name">فريق 2</span>
+            <span class="squad-budget"><span id="squad2-budget">500</span> م متبقي</span>
+          </div>
+          <div class="squad-slots" id="squad2-slots"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== RESULT SCREEN ===================== -->
+    <section class="screen" id="screen-result">
+      <div class="card result-hero">
+        <span class="eyebrow">انتهى المزاد</span>
+        <h2>🏆 نتيجة المباراة النهائية</h2>
+        <div class="score-board">
+          <div class="score-side">
+            <span class="score-name" id="res-name1">فريق 1</span>
+            <span class="score-num" id="res-score1">0</span>
+          </div>
+          <span class="score-sep">—</span>
+          <div class="score-side">
+            <span class="score-num" id="res-score2">0</span>
+            <span class="score-name" id="res-name2">فريق 2</span>
+          </div>
+        </div>
+        <p class="winner-line" id="winner-line">—</p>
+      </div>
+
+      <div class="squads-wrap">
+        <div class="squad-panel" id="res-squad-1">
+          <div class="squad-head">
+            <span class="squad-name" id="res-squad1-name">فريق 1</span>
+          </div>
+          <div class="squad-slots" id="res-squad1-slots"></div>
+        </div>
+        <div class="squad-panel" id="res-squad-2">
+          <div class="squad-head">
+            <span class="squad-name" id="res-squad2-name">فريق 2</span>
+          </div>
+          <div class="squad-slots" id="res-squad2-slots"></div>
+        </div>
+      </div>
+
+      <button class="btn btn-gold btn-block" id="btn-replay">🔄 العب مرة أخرى</button>
+    </section>
+
+  </main>
+
+  <div class="card links-card">
+    <h3 class="section-title">🔗 روابط مهمة</h3>
+    <div class="links-list">
+      <a class="link-row" href="https://chat.whatsapp.com/EpoiTNnKary0mitF5j3Zlh?s=cl&p=a&ilr=4" target="_blank" rel="noopener">
+        <span class="link-icon">💬</span>
+        <span class="link-text">جروب واتساب الرسمي</span>
+        <span class="link-arrow">‹</span>
+      </a>
+      <a class="link-row" href="https://www.instagram.com/x____imad___0?igsh=MXJwMnNod2hjNGJwdQ==" target="_blank" rel="noopener">
+        <span class="link-icon">📸</span>
+        <span class="link-text">تابعنا على إنستغرام</span>
+        <span class="link-arrow">‹</span>
+      </a>
+      <a class="link-row" href="https://github.com/your-username/your-repo" target="_blank" rel="noopener">
+        <span class="link-icon">💻</span>
+        <span class="link-text">الكود المصدري</span>
+        <span class="link-arrow">‹</span>
+      </a>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <p>IMAD PRO — مزاد النجوم ⚽</p>
+  </footer>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
