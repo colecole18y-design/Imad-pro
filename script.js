@@ -35,62 +35,62 @@ function init(){
 /* tier: 1 = famous/expensive, 2 = known, 3 = lesser known/cheap */
 const PLAYERS = [
   // Goalkeepers
-  {name:"أليسون بيكر", pos:"GK", price:60, rating:89, tier:1},
-  {name:"تيبو كورتوا", pos:"GK", price:55, rating:88, tier:1},
-  {name:"إيدرسون", pos:"GK", price:45, rating:86, tier:2},
-  {name:"يان أوبلاك", pos:"GK", price:28, rating:84, tier:2},
-  {name:"مانويل نوير", pos:"GK", price:15, rating:82, tier:3},
-  {name:"ميكي إينيانا", pos:"GK", price:10, rating:78, tier:3},
+  {name:"أليسون بيكر", pos:"GK", price:60, rating:89, tier:1, club:"ليفربول"},
+  {name:"تيبو كورتوا", pos:"GK", price:55, rating:88, tier:1, club:"ريال مدريد"},
+  {name:"إيدرسون", pos:"GK", price:45, rating:86, tier:2, club:"مانشستر سيتي"},
+  {name:"يان أوبلاك", pos:"GK", price:28, rating:84, tier:2, club:"أتلتيكو مدريد"},
+  {name:"مانويل نوير", pos:"GK", price:15, rating:82, tier:3, club:"بايرن ميونخ"},
+  {name:"ميكي إينيانا", pos:"GK", price:10, rating:78, tier:3, club:"برشلونة"},
 
   // Defenders
-  {name:"فيرجيل فان دايك", pos:"DF", price:65, rating:90, tier:1},
-  {name:"روبين دياز", pos:"DF", price:60, rating:88, tier:1},
-  {name:"أنطونيو روديغر", pos:"DF", price:42, rating:86, tier:2},
-  {name:"تشيرويل هيرنانديز", pos:"DF", price:38, rating:85, tier:2},
-  {name:"تريغيه مبابي", pos:"DF", price:35, rating:84, tier:2},
-  {name:"وليام ساليبا", pos:"DF", price:50, rating:87, tier:1},
-  {name:"أليساندرو باستوني", pos:"DF", price:40, rating:85, tier:2},
-  {name:"جوشكو غفارديول", pos:"DF", price:55, rating:87, tier:1},
-  {name:"بن وايت", pos:"DF", price:22, rating:81, tier:3},
-  {name:"نيكو شلوتربيك", pos:"DF", price:20, rating:80, tier:3},
-  {name:"دان بوردي", pos:"DF", price:12, rating:76, tier:3},
-  {name:"يوشكو غيندوزي", pos:"DF", price:9, rating:74, tier:3},
+  {name:"فيرجيل فان دايك", pos:"DF", price:65, rating:90, tier:1, club:"ليفربول"},
+  {name:"روبين دياز", pos:"DF", price:60, rating:88, tier:1, club:"مانشستر سيتي"},
+  {name:"أنطونيو روديغر", pos:"DF", price:42, rating:86, tier:2, club:"ريال مدريد"},
+  {name:"تشيرويل هيرنانديز", pos:"DF", price:38, rating:85, tier:2, club:"أستون فيلا"},
+  {name:"تريغيه مبابي", pos:"DF", price:35, rating:84, tier:2, club:"موناكو"},
+  {name:"وليام ساليبا", pos:"DF", price:50, rating:87, tier:1, club:"أرسنال"},
+  {name:"أليساندرو باستوني", pos:"DF", price:40, rating:85, tier:2, club:"إنتر ميلان"},
+  {name:"جوشكو غفارديول", pos:"DF", price:55, rating:87, tier:1, club:"مانشستر سيتي"},
+  {name:"بن وايت", pos:"DF", price:22, rating:81, tier:3, club:"أرسنال"},
+  {name:"نيكو شلوتربيك", pos:"DF", price:20, rating:80, tier:3, club:"بوروسيا دورتموند"},
+  {name:"دان بوردي", pos:"DF", price:12, rating:76, tier:3, club:"برايتون"},
+  {name:"يوشكو غيندوزي", pos:"DF", price:9, rating:74, tier:3, club:"لاتسيو"},
 
   // Midfielders
-  {name:"كيفن دي بروين", pos:"MF", price:70, rating:90, tier:1},
-  {name:"جود بيلينغهام", pos:"MF", price:90, rating:91, tier:1},
-  {name:"رودري", pos:"MF", price:75, rating:90, tier:1},
-  {name:"بيدري", pos:"MF", price:55, rating:87, tier:2},
-  {name:"دِكلان رايس", pos:"MF", price:50, rating:86, tier:2},
-  {name:"فيديريكو فالفيردي", pos:"MF", price:60, rating:88, tier:2},
-  {name:"مارتن أوديغارد", pos:"MF", price:48, rating:86, tier:2},
-  {name:"إنزو فيرنانديز", pos:"MF", price:45, rating:85, tier:2},
-  {name:"جافي هيرنانديز", pos:"MF", price:42, rating:85, tier:2},
-  {name:"إيليوت أندرسون", pos:"MF", price:14, rating:78, tier:3},
-  {name:"كارني تشوكوميلا", pos:"MF", price:9, rating:75, tier:3},
-  {name:"رومان بورخي", pos:"MF", price:11, rating:76, tier:3},
-  {name:"أليكسيس ماك أليستر", pos:"MF", price:38, rating:84, tier:2},
+  {name:"كيفن دي بروين", pos:"MF", price:70, rating:90, tier:1, club:"مانشستر سيتي"},
+  {name:"جود بيلينغهام", pos:"MF", price:90, rating:91, tier:1, club:"ريال مدريد"},
+  {name:"رودري", pos:"MF", price:75, rating:90, tier:1, club:"مانشستر سيتي"},
+  {name:"بيدري", pos:"MF", price:55, rating:87, tier:2, club:"برشلونة"},
+  {name:"دِكلان رايس", pos:"MF", price:50, rating:86, tier:2, club:"أرسنال"},
+  {name:"فيديريكو فالفيردي", pos:"MF", price:60, rating:88, tier:2, club:"ريال مدريد"},
+  {name:"مارتن أوديغارد", pos:"MF", price:48, rating:86, tier:2, club:"أرسنال"},
+  {name:"إنزو فيرنانديز", pos:"MF", price:45, rating:85, tier:2, club:"تشيلسي"},
+  {name:"جافي هيرنانديز", pos:"MF", price:42, rating:85, tier:2, club:"برشلونة"},
+  {name:"إيليوت أندرسون", pos:"MF", price:14, rating:78, tier:3, club:"نوتنغهام فورست"},
+  {name:"كارني تشوكوميلا", pos:"MF", price:9, rating:75, tier:3, club:"برايتون"},
+  {name:"رومان بورخي", pos:"MF", price:11, rating:76, tier:3, club:"فولفسبورغ"},
+  {name:"أليكسيس ماك أليستر", pos:"MF", price:38, rating:84, tier:2, club:"ليفربول"},
 
   // Forwards
-  {name:"كيليان مبابي", pos:"FW", price:150, rating:94, tier:1},
-  {name:"إيرلينغ هالاند", pos:"FW", price:140, rating:93, tier:1},
-  {name:"فينيسيوس جونيور", pos:"FW", price:120, rating:92, tier:1},
-  {name:"لامين يامال", pos:"FW", price:110, rating:91, tier:1},
-  {name:"هاري كين", pos:"FW", price:75, rating:88, tier:2},
-  {name:"رافينيا", pos:"FW", price:55, rating:86, tier:2},
-  {name:"بوكايو ساكا", pos:"FW", price:70, rating:87, tier:2},
-  {name:"عثمان ديمبلي", pos:"FW", price:65, rating:86, tier:2},
-  {name:"فيكتور أوسيمين", pos:"FW", price:68, rating:87, tier:2},
-  {name:"رسمين دورتوند", pos:"FW", price:16, rating:79, tier:3},
-  {name:"إليي وحيد", pos:"FW", price:10, rating:76, tier:3},
-  {name:"كيندري بايس", pos:"FW", price:8, rating:74, tier:3},
+  {name:"كيليان مبابي", pos:"FW", price:150, rating:94, tier:1, club:"ريال مدريد"},
+  {name:"إيرلينغ هالاند", pos:"FW", price:140, rating:93, tier:1, club:"مانشستر سيتي"},
+  {name:"فينيسيوس جونيور", pos:"FW", price:120, rating:92, tier:1, club:"ريال مدريد"},
+  {name:"لامين يامال", pos:"FW", price:110, rating:91, tier:1, club:"برشلونة"},
+  {name:"هاري كين", pos:"FW", price:75, rating:88, tier:2, club:"بايرن ميونخ"},
+  {name:"رافينيا", pos:"FW", price:55, rating:86, tier:2, club:"برشلونة"},
+  {name:"بوكايو ساكا", pos:"FW", price:70, rating:87, tier:2, club:"أرسنال"},
+  {name:"عثمان ديمبلي", pos:"FW", price:65, rating:86, tier:2, club:"باريس سان جيرمان"},
+  {name:"فيكتور أوسيمين", pos:"FW", price:68, rating:87, tier:2, club:"نابولي"},
+  {name:"رسمين دورتوند", pos:"FW", price:16, rating:79, tier:3, club:"موناكو"},
+  {name:"إليي وحيد", pos:"FW", price:10, rating:76, tier:3, club:"وست هام"},
+  {name:"كيندري بايس", pos:"FW", price:8, rating:74, tier:3, club:"لايبزيغ"},
 ];
 
 const POS_LABEL = {GK:"حارس مرمى", DF:"مدافع", MF:"وسط", FW:"مهاجم"};
 const POS_ICON = {GK:"🧤", DF:"🛡️", MF:"🎯", FW:"⚡"};
 
-/* 11 rounds -> 1 GK, 4 DF, 4 MF, 2 FW */
-const ROUND_POSITIONS = ["GK","DF","MF","FW","DF","MF","DF","FW","MF","DF","MF"];
+/* 11 rounds -> 1 GK, 4 DF, 4 MF, 2 FW — in order: keeper first, then defense, midfield, attack */
+const ROUND_POSITIONS = ["GK","DF","DF","DF","DF","MF","MF","MF","MF","FW","FW"];
 
 /* ---------- State ---------- */
 let state = null;
@@ -835,19 +835,46 @@ function maybeTriggerComputerTurn(){
 }
 
 /* ---------- Rendering (shared by the engine owner AND by an online guest mirroring synced state) ---------- */
+const AVATAR_PALETTE = [
+  ["#d4af37", "#8a6d1f"], ["#4fa8e0", "#1f5e8a"], ["#46c98a", "#1f6b47"],
+  ["#e0503c", "#8a291f"], ["#a06ee0", "#5c3d8a"], ["#e0a83c", "#8a611f"],
+  ["#3ce0c8", "#1f8a79"], ["#e05c9c", "#8a2f5c"],
+];
+
+function getInitials(name){
+  const parts = String(name).trim().split(/\s+/);
+  const first = parts[0] ? parts[0][0] : "؟";
+  const second = parts[1] ? parts[1][0] : "";
+  return (first + second).toUpperCase();
+}
+
+function colorForName(name){
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  const [c1, c2] = AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
+  return `radial-gradient(circle at 35% 30%, ${c1}, ${c2} 75%)`;
+}
+
 function renderGameFromState(){
   if (!state.currentPlayer) return;
   const position = state.currentPlayer.pos;
+  const player = state.currentPlayer;
 
   $("#round-num").textContent = state.round;
   $("#round-total").textContent = ROUND_POSITIONS.length;
   $("#pos-chip").textContent = POS_ICON[position] + " " + POS_LABEL[position];
-  $("#player-jersey").textContent = POS_ICON[position];
-  $("#player-name").textContent = state.currentPlayer.name;
+
+  const jersey = $("#player-jersey");
+  jersey.textContent = getInitials(player.name);
+  jersey.style.background = colorForName(player.name);
+
+  $("#player-name").textContent = player.name;
+  $("#player-club").textContent = player.club || "";
   const badge = $("#player-pos-badge");
   badge.textContent = position;
   badge.className = "badge pos-" + position;
-  $("#player-base").textContent = state.currentPlayer.price;
+  $("#player-base").textContent = player.price;
+  $("#player-rating").textContent = player.rating || "—";
   $("#current-bid").textContent = state.currentBid;
   $("#bidder-line").textContent = state.currentBidder ? ("أعلى عرض من: " + nameOf(state.currentBidder)) : "لا يوجد عرض بعد";
   $("#warn-line").hidden = true;
