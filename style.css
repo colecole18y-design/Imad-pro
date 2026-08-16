@@ -1,323 +1,991 @@
-/* ===================== IMAD PRO — Stadium Night Theme ===================== */
+/* ===================== IMAD PRO — مزاد النجوم — Game Logic ===================== */
+(function(){
+"use strict";
 
-:root{
-  --bg-deep: #071a12;
-  --bg-deep-2: #05130d;
-  --panel: #0e2a1e;
-  --panel-2: #123423;
-  --panel-border: rgba(212,175,55,0.16);
-  --gold: #d4af37;
-  --gold-light: #f2d675;
-  --cream: #f5efe0;
-  --muted: #9db3a6;
-  --red: #e0503c;
-  --blue: #4fa8e0;
-  --green-pos: #46c98a;
-  --amber: #e0a83c;
-  --win: #3ecf8e;
-  --radius: 18px;
-  --radius-sm: 12px;
-}
-
-*{ box-sizing: border-box; }
-
-html,body{
-  margin:0; padding:0;
-  min-height:100%;
-  background: var(--bg-deep);
-  color: var(--cream);
-  font-family: 'Tajawal', sans-serif;
-  -webkit-font-smoothing: antialiased;
+/* ---------- Firebase (used only for the online room mode) ---------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyA4Ktrb_0p30tNhngkWzQ757lIPSTcIuOU",
+  authDomain: "imad-pro-b1883.firebaseapp.com",
+  databaseURL: "https://imad-pro-b1883-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "imad-pro-b1883",
+  storageBucket: "imad-pro-b1883.firebasestorage.app",
+  messagingSenderId: "67409727001",
+  appId: "1:67409727001:web:c188dff61e0c4567c16488"
+};
+let db = null;
+try {
+  if (window.firebase){
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+  }
+} catch (e) {
+  console.warn("Firebase init failed — online mode will be unavailable.", e);
 }
 
-h1,h2,h3{ font-family:'Cairo', sans-serif; margin:0; }
-
-button{ font-family:'Tajawal', sans-serif; }
-
-/* ---------- Stadium background (signature element) ---------- */
-.stadium-bg{
-  position: fixed; inset: 0; z-index: -1; overflow: hidden;
-  background:
-    radial-gradient(120% 90% at 50% -10%, #123c28 0%, var(--bg-deep) 55%, var(--bg-deep-2) 100%);
-}
-.floodlight{
-  position:absolute; width: 60vw; height: 60vw; border-radius:50%;
-  background: radial-gradient(circle, rgba(212,175,55,0.22) 0%, rgba(212,175,55,0.06) 40%, transparent 70%);
-  filter: blur(2px);
-  animation: sway 12s ease-in-out infinite alternate;
-}
-.fl-1{ top:-20vw; right:-15vw; }
-.fl-2{ bottom:-25vw; left:-20vw; animation-delay: 3s; background: radial-gradient(circle, rgba(70,201,138,0.18) 0%, rgba(70,201,138,0.05) 40%, transparent 70%); }
-@keyframes sway{
-  from{ transform: translateY(0) scale(1); }
-  to{ transform: translateY(3vw) scale(1.08); }
-}
-.pitch-lines{
-  position:absolute; inset:0;
-  background-image:
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0 2px, transparent 2px 90px);
-  opacity:0.5;
-}
-.grain{
-  position:absolute; inset:0;
-  background-image: radial-gradient(rgba(255,255,255,0.025) 1px, transparent 1px);
-  background-size: 3px 3px;
+// Run once the DOM is fully parsed, no matter where the <script> tag sits in the page.
+if (document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
 }
 
-@media (prefers-reduced-motion: reduce){
-  .floodlight{ animation: none; }
+function init(){
+
+/* ---------- Player database ---------- */
+/* tier: 1 = famous/expensive, 2 = known, 3 = lesser known/cheap */
+const PLAYERS = [
+  // Goalkeepers
+  {name:"أليسون بيكر", pos:"GK", price:60, rating:89, tier:1},
+  {name:"تيبو كورتوا", pos:"GK", price:55, rating:88, tier:1},
+  {name:"إيدرسون", pos:"GK", price:45, rating:86, tier:2},
+  {name:"يان أوبلاك", pos:"GK", price:28, rating:84, tier:2},
+  {name:"مانويل نوير", pos:"GK", price:15, rating:82, tier:3},
+  {name:"ميكي إينيانا", pos:"GK", price:10, rating:78, tier:3},
+
+  // Defenders
+  {name:"فيرجيل فان دايك", pos:"DF", price:65, rating:90, tier:1},
+  {name:"روبين دياز", pos:"DF", price:60, rating:88, tier:1},
+  {name:"أنطونيو روديغر", pos:"DF", price:42, rating:86, tier:2},
+  {name:"تشيرويل هيرنانديز", pos:"DF", price:38, rating:85, tier:2},
+  {name:"تريغيه مبابي", pos:"DF", price:35, rating:84, tier:2},
+  {name:"وليام ساليبا", pos:"DF", price:50, rating:87, tier:1},
+  {name:"أليساندرو باستوني", pos:"DF", price:40, rating:85, tier:2},
+  {name:"جوشكو غفارديول", pos:"DF", price:55, rating:87, tier:1},
+  {name:"بن وايت", pos:"DF", price:22, rating:81, tier:3},
+  {name:"نيكو شلوتربيك", pos:"DF", price:20, rating:80, tier:3},
+  {name:"دان بوردي", pos:"DF", price:12, rating:76, tier:3},
+  {name:"يوشكو غيندوزي", pos:"DF", price:9, rating:74, tier:3},
+
+  // Midfielders
+  {name:"كيفن دي بروين", pos:"MF", price:70, rating:90, tier:1},
+  {name:"جود بيلينغهام", pos:"MF", price:90, rating:91, tier:1},
+  {name:"رودري", pos:"MF", price:75, rating:90, tier:1},
+  {name:"بيدري", pos:"MF", price:55, rating:87, tier:2},
+  {name:"دِكلان رايس", pos:"MF", price:50, rating:86, tier:2},
+  {name:"فيديريكو فالفيردي", pos:"MF", price:60, rating:88, tier:2},
+  {name:"مارتن أوديغارد", pos:"MF", price:48, rating:86, tier:2},
+  {name:"إنزو فيرنانديز", pos:"MF", price:45, rating:85, tier:2},
+  {name:"جافي هيرنانديز", pos:"MF", price:42, rating:85, tier:2},
+  {name:"إيليوت أندرسون", pos:"MF", price:14, rating:78, tier:3},
+  {name:"كارني تشوكوميلا", pos:"MF", price:9, rating:75, tier:3},
+  {name:"رومان بورخي", pos:"MF", price:11, rating:76, tier:3},
+  {name:"أليكسيس ماك أليستر", pos:"MF", price:38, rating:84, tier:2},
+
+  // Forwards
+  {name:"كيليان مبابي", pos:"FW", price:150, rating:94, tier:1},
+  {name:"إيرلينغ هالاند", pos:"FW", price:140, rating:93, tier:1},
+  {name:"فينيسيوس جونيور", pos:"FW", price:120, rating:92, tier:1},
+  {name:"لامين يامال", pos:"FW", price:110, rating:91, tier:1},
+  {name:"هاري كين", pos:"FW", price:75, rating:88, tier:2},
+  {name:"رافينيا", pos:"FW", price:55, rating:86, tier:2},
+  {name:"بوكايو ساكا", pos:"FW", price:70, rating:87, tier:2},
+  {name:"عثمان ديمبلي", pos:"FW", price:65, rating:86, tier:2},
+  {name:"فيكتور أوسيمين", pos:"FW", price:68, rating:87, tier:2},
+  {name:"رسمين دورتوند", pos:"FW", price:16, rating:79, tier:3},
+  {name:"إليي وحيد", pos:"FW", price:10, rating:76, tier:3},
+  {name:"كيندري بايس", pos:"FW", price:8, rating:74, tier:3},
+];
+
+const POS_LABEL = {GK:"حارس مرمى", DF:"مدافع", MF:"وسط", FW:"مهاجم"};
+const POS_ICON = {GK:"🧤", DF:"🛡️", MF:"🎯", FW:"⚡"};
+
+/* 11 rounds -> 1 GK, 4 DF, 4 MF, 2 FW */
+const ROUND_POSITIONS = ["GK","DF","MF","FW","DF","MF","DF","FW","MF","DF","MF"];
+
+/* ---------- State ---------- */
+let state = null;
+
+/* ---------- Online room state ---------- */
+let onlineRole = null;     // 'host' | 'guest' | null
+let roomCode = null;
+let roomRef = null;
+let myOnlineName = "";
+let actionsListenerAttached = false;
+const SESSION_KEY = "imadpro_online_session";
+const LOCAL_SAVE_KEY = "imadpro_local_save";
+const LEADERBOARD_KEY = "imadpro_leaderboard";
+
+/* ===================== POINTS / LEADERBOARD ===================== */
+function sanitizeKey(name){
+  return String(name).trim().replace(/[.#$\[\]\/\s]+/g, "_").slice(0, 60) || "لاعب";
 }
 
-/* ---------- Shell ---------- */
-.app-shell{
-  max-width: 480px;
-  margin: 0 auto;
-  min-height: 100vh;
-  padding: 18px 16px 40px;
-  display:flex; flex-direction:column;
+function readLocalLeaderboard(){
+  try { return JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "{}"); }
+  catch (e) { return {}; }
 }
 
-.topbar{ padding: 4px 2px 18px; }
-.brand{ display:flex; align-items:center; gap:12px; }
-.brand-badge{
-  font-size: 30px;
-  width:52px; height:52px; border-radius:16px;
-  display:flex; align-items:center; justify-content:center;
-  background: linear-gradient(155deg, var(--panel-2), var(--panel));
-  border: 1px solid var(--panel-border);
-  box-shadow: 0 0 0 1px rgba(212,175,55,0.05), 0 8px 20px rgba(0,0,0,0.35);
+function writeLocalLeaderboard(board){
+  try { localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(board)); } catch (e) {}
 }
-.brand-text h1{
-  font-size: 22px; font-weight:900; letter-spacing:0.5px; color: var(--cream);
-}
-.brand-text h1 span{ color: var(--gold); }
-.brand-text p{ margin:2px 0 0; font-size:12.5px; color: var(--muted); }
 
-/* ---------- Screens ---------- */
-.screen{ display:none; flex-direction:column; gap:14px; animation: rise 0.35s ease; }
-.screen.active{ display:flex; }
-@keyframes rise{ from{ opacity:0; transform: translateY(8px); } to{ opacity:1; transform:none; } }
+function awardPoints(name, delta){
+  const cleanName = String(name || "").trim();
+  if (!cleanName) return;
 
-/* ---------- Cards ---------- */
-.card{
-  background: linear-gradient(165deg, var(--panel-2), var(--panel));
-  border: 1px solid var(--panel-border);
-  border-radius: var(--radius);
-  padding: 18px;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.28);
-}
-.eyebrow{
-  display:inline-block; font-size:11.5px; font-weight:700; letter-spacing:1px;
-  color: var(--gold); text-transform: uppercase; margin-bottom:6px;
-}
-.card h2{ font-size:19px; color: var(--cream); margin-bottom:6px; }
-.muted{ color: var(--muted); font-size:13.5px; line-height:1.7; margin:0; }
+  const board = readLocalLeaderboard();
+  const key = sanitizeKey(cleanName);
+  const prevLocal = (board[key] && board[key].points) || 0;
+  board[key] = { name: cleanName, points: prevLocal + delta };
+  writeLocalLeaderboard(board);
 
-/* ---------- Home: mode options ---------- */
-.option-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-.option-card-wide{ grid-column: 1 / -1; flex-direction:row; align-items:center; gap:12px; }
-.option-card-wide .opt-icon{ font-size:26px; }
-.option-card-wide .opt-title{ margin-left:2px; }
-.option-card{
-  cursor:pointer; text-align:right;
-  background: var(--panel); border:1px solid var(--panel-border);
-  border-radius: var(--radius-sm); padding: 14px 12px;
-  display:flex; flex-direction:column; gap:6px;
-  color: var(--cream); transition: 0.15s ease;
+  if (db){
+    db.ref("leaderboard/" + key).transaction(cur => {
+      const val = cur || { name: cleanName, points: 0 };
+      val.name = cleanName;
+      val.points = (val.points || 0) + delta;
+      return val;
+    });
+  }
 }
-.option-card:hover, .option-card:focus-visible{ border-color: var(--gold); transform: translateY(-2px); outline:none; }
-.option-card.selected{ border-color: var(--gold); background: linear-gradient(165deg, rgba(212,175,55,0.14), var(--panel)); box-shadow: 0 0 0 1px var(--gold) inset; }
-.opt-icon{ font-size:24px; }
-.opt-title{ font-weight:700; font-size:14.5px; }
-.opt-desc{ font-size:11.5px; color: var(--muted); line-height:1.5; }
 
-.form-card .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:12px; font-size:13px; color: var(--muted); }
-.form-card .field em{ color: var(--gold); font-style:normal; font-size:11px; }
-.form-card input[type="text"]{
-  background: var(--bg-deep); border:1px solid var(--panel-border); border-radius:10px;
-  padding:11px 12px; color: var(--cream); font-size:14.5px; font-family:'Tajawal',sans-serif;
+function pointsLabel(delta){
+  if (delta > 0) return { text: "+" + delta + " نقطة", cls: "pos" };
+  if (delta < 0) return { text: delta + " نقطة", cls: "neg" };
+  return { text: "0 نقطة", cls: "zero" };
 }
-.form-card input[type="text"]:focus{ outline:2px solid var(--gold); border-color: transparent; }
-.error-msg{ color: var(--red); font-size:12.5px; margin: 0 0 10px; }
 
-/* ---------- Links card ---------- */
-.links-card .section-title{ margin-bottom:10px; }
-.links-list{ display:flex; flex-direction:column; gap:8px; }
-.link-row{
-  display:flex; align-items:center; gap:10px; text-decoration:none;
-  background: var(--bg-deep); border:1px solid var(--panel-border); border-radius:12px;
-  padding:12px 14px; color: var(--cream); transition: 0.15s ease;
-}
-.link-row:hover{ border-color: var(--gold); background: rgba(212,175,55,0.06); }
-.link-icon{ font-size:18px; }
-.link-text{ flex:1; font-size:13.5px; font-weight:600; }
-.link-arrow{ color: var(--muted); font-size:16px; }
+function loadLeaderboard(){
+  const listEl = $("#leaderboard-list");
+  listEl.innerHTML = '<p class="hint">جاري التحميل…</p>';
 
-/* ---------- Buttons ---------- */
-.btn{
-  border:none; border-radius: 12px; padding: 13px 16px; font-size:14.5px; font-weight:700;
-  cursor:pointer; transition: 0.15s ease;
+  if (db){
+    db.ref("leaderboard").orderByChild("points").limitToLast(20).once("value").then(snap => {
+      const entries = [];
+      snap.forEach(child => { entries.push(child.val()); });
+      entries.reverse(); // limitToLast returns ascending order
+      renderLeaderboardList(entries);
+    }).catch(() => renderLeaderboardList(localLeaderboardAsList()));
+  } else {
+    renderLeaderboardList(localLeaderboardAsList());
+  }
 }
-.btn:focus-visible{ outline: 2px solid var(--gold-light); outline-offset:2px; }
-.btn-block{ width:100%; }
-.btn-gold{
-  background: linear-gradient(135deg, var(--gold-light), var(--gold));
-  color:#1a1405; box-shadow: 0 8px 20px rgba(212,175,55,0.25);
-}
-.btn-gold:hover{ filter: brightness(1.06); transform: translateY(-1px); }
-.btn-gold:disabled{ opacity:0.45; cursor:not-allowed; transform:none; filter:none; }
-.btn-ghost{
-  background: transparent; border:1px solid var(--panel-border); color: var(--muted);
-}
-.btn-ghost:hover{ border-color: var(--gold); color: var(--cream); }
-.actions-row{ display:flex; gap:10px; }
-.actions-row .btn-block{ flex:1; }
 
-/* ---------- Setup screen ---------- */
-.section-title{ font-size:14.5px; color: var(--cream); margin-bottom:12px; }
-.pill-group{ display:flex; flex-direction:column; gap:8px; }
-.pill{
-  display:flex; justify-content:space-between; align-items:center; text-align:right;
-  background: var(--bg-deep); border:1px solid var(--panel-border); border-radius:12px;
-  padding:12px 14px; color: var(--cream); cursor:pointer;
+function localLeaderboardAsList(){
+  const board = readLocalLeaderboard();
+  return Object.values(board).sort((a,b) => b.points - a.points);
 }
-.pill strong{ font-size:14px; }
-.pill small{ color: var(--muted); font-size:11.5px; }
-.pill.selected{ border-color: var(--gold); background: rgba(212,175,55,0.1); }
-.pill[data-color="green"].selected{ border-color: var(--green-pos); }
-.pill[data-color="amber"].selected{ border-color: var(--amber); }
-.pill[data-color="red"].selected{ border-color: var(--red); }
-.hint{ color: var(--muted); font-size:11.5px; margin: 10px 0 0; }
 
-.slider-row{ display:flex; align-items:center; gap:12px; }
-.slider-row input[type="range"]{
-  flex:1; accent-color: var(--gold); height:4px;
+function renderLeaderboardList(entries){
+  const listEl = $("#leaderboard-list");
+  if (!entries || !entries.length){
+    listEl.innerHTML = '<p class="hint">لسه مفيش نتايج مسجّلة — العب أول مزاد!</p>';
+    return;
+  }
+  listEl.innerHTML = entries.map((e, i) => `
+    <div class="leaderboard-row">
+      <span class="leaderboard-rank">${i+1}</span>
+      <span class="leaderboard-name">${escapeHtml(e.name)}</span>
+      <span class="leaderboard-points">${e.points}</span>
+    </div>
+  `).join("");
 }
-.slider-val{ min-width:56px; text-align:center; font-weight:800; color: var(--gold-light); font-size:13.5px; }
 
-/* ---------- Online room screen ---------- */
-.or-sep{ text-align:center; color: var(--muted); font-size:12px; margin: 14px 0 10px; }
-.join-row{ display:flex; gap:8px; }
-.join-row input{
-  flex:1; background: var(--bg-deep); border:1px solid var(--panel-border); border-radius:10px;
-  padding:11px 12px; color: var(--cream); font-size:15px; letter-spacing:2px; text-align:center;
-  font-family:'Cairo',sans-serif; font-weight:800;
+function escapeHtml(str){
+  const div = document.createElement("div");
+  div.textContent = String(str);
+  return div.innerHTML;
 }
-.join-row input:focus{ outline:2px solid var(--gold); border-color: transparent; }
-.join-row .btn{ white-space:nowrap; }
 
-.room-code{
-  text-align:center; font-family:'Cairo',sans-serif; font-weight:900; font-size:38px;
-  letter-spacing:8px; color: var(--gold-light); background: var(--bg-deep);
-  border:1px dashed var(--panel-border); border-radius:12px; padding:16px 10px; margin: 10px 0 14px;
-  text-shadow: 0 0 20px rgba(212,175,55,0.3);
+/* ===================== LOCAL AUTOSAVE (ai / local modes) ===================== */
+function saveLocalProgress(){
+  if (!state || state.mode === "online" || state.status === "finished") return;
+  try { localStorage.setItem(LOCAL_SAVE_KEY, JSON.stringify(state)); } catch (e) {}
 }
-.waiting-line{
-  text-align:center; color: var(--muted); font-size:13px; margin: 14px 0 0;
-  display:flex; align-items:center; justify-content:center; gap:8px;
+function clearLocalProgress(){
+  try { localStorage.removeItem(LOCAL_SAVE_KEY); } catch (e) {}
 }
-.waiting-line::before{
-  content:""; width:8px; height:8px; border-radius:50%; background: var(--gold);
-  animation: pulse-dot 1.2s ease-in-out infinite;
+function tryResumeLocalProgress(){
+  if (state) return; // an online session already took over
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(LOCAL_SAVE_KEY) || "null"); } catch (e) {}
+  if (!saved || !saved.currentPlayer || saved.status === "finished") return;
+  state = saved;
+  normalizeStateArrays();
+  $("#squad1-name").textContent = state.p1Name;
+  $("#squad2-name").textContent = state.p2Name;
+  showScreen("screen-game");
+  renderGameFromState();
+  startTimer();
 }
-@keyframes pulse-dot{ 0%,100%{ opacity:0.3; transform:scale(0.85);} 50%{ opacity:1; transform:scale(1.15);} }
-@media (prefers-reduced-motion: reduce){ .waiting-line::before{ animation:none; } }
 
-.role-hint{ font-size:11.5px; color: var(--gold); margin: -2px 0 8px; }
-
-/* ---------- Game screen ---------- */
-.game-topbar{ display:flex; justify-content:space-between; align-items:center; }
-.round-chip, .pos-chip{
-  font-size:12.5px; font-weight:700; padding:7px 12px; border-radius:20px;
-  background: var(--panel); border:1px solid var(--panel-border); color: var(--cream);
+function freshPool(){
+  return PLAYERS.map(p => Object.assign({}, p));
 }
-.pos-chip{ color: var(--gold); }
-.icon-btn{
-  width:36px; height:36px; border-radius:50%; font-size:16px;
-  background: var(--panel); border:1px solid var(--panel-border); color: var(--cream);
-  cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+
+function newState(){
+  return {
+    mode: null,               // 'ai' | 'local' | 'online'
+    p1Name: "فريق 1",
+    p2Name: "فريق 2",
+    difficulty: "medium",
+    timerSetting: 20,
+    budget: 500,
+    pool: freshPool(),
+    round: 0,
+    squad1: [], squad2: [],
+    budget1: 500, budget2: 500,
+    currentPlayer: null,
+    currentBid: 0,
+    currentBidder: null,      // 1 | 2 | null
+    activeTurn: 1,            // whose turn to act, 1 or 2
+    timeLeft: 20,
+    consolationPlayer: null,
+    status: "playing",        // 'playing' | 'finished' (used for online sync)
+    finalScore1: null,
+    finalScore2: null,
+    winnerText: "",
+  };
 }
-.icon-btn:hover{ border-color: var(--gold); }
 
-.spotlight-card{ text-align:center; position:relative; overflow:hidden; }
-.player-jersey{
-  font-size:42px; width:78px; height:78px; margin:0 auto 8px;
-  display:flex; align-items:center; justify-content:center; border-radius:50%;
-  background: radial-gradient(circle at 35% 30%, rgba(212,175,55,0.35), var(--panel-2) 70%);
-  border: 1px solid var(--panel-border);
+let timerId = null; // local-only, never synced (each browser runs its own display timer)
+
+/* ---------- DOM helpers ---------- */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+function showScreen(id){
+  $$(".screen").forEach(s => s.classList.remove("active"));
+  $("#" + id).classList.add("active");
 }
-.player-name{ font-size:21px; color: var(--cream); margin-bottom:8px; }
-.player-meta{ display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
-.badge{
-  font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:8px;
-  background: rgba(70,201,138,0.16); color: var(--green-pos); border:1px solid rgba(70,201,138,0.3);
+
+/* ===================== HOME SCREEN ===================== */
+let selectedMode = null;
+
+$$("#mode-grid .option-card").forEach(card => {
+  card.addEventListener("click", () => {
+    selectedMode = card.dataset.mode;
+    $$("#mode-grid .option-card").forEach(c => c.classList.remove("selected"));
+    card.classList.add("selected");
+    $("#field-p2").hidden = selectedMode !== "local";
+  });
+});
+
+$("#btn-to-setup").addEventListener("click", () => {
+  const p1 = $("#input-p1").value.trim();
+  const errEl = $("#home-error");
+  if (!selectedMode){
+    errEl.textContent = "اختر طريقة اللعب أولاً"; errEl.hidden = false; return;
+  }
+  if (!p1){
+    errEl.textContent = "من فضلك اكتب اسمك"; errEl.hidden = false; return;
+  }
+
+  if (selectedMode === "online"){
+    if (!db){
+      errEl.textContent = "تعذّر الاتصال بخدمة الأونلاين — تأكد من الإنترنت"; errEl.hidden = false; return;
+    }
+    errEl.hidden = true;
+    myOnlineName = p1;
+    resetOnlineRoomUI();
+    showScreen("screen-online");
+    return;
+  }
+
+  let p2 = "الحاسوب 🤖";
+  if (selectedMode === "local"){
+    p2 = $("#input-p2").value.trim();
+    if (!p2){ errEl.textContent = "اكتب اسم اللاعب الثاني"; errEl.hidden = false; return; }
+  }
+  errEl.hidden = true;
+  state = newState();
+  state.mode = selectedMode;
+  state.p1Name = p1;
+  state.p2Name = p2;
+  showScreen("screen-setup");
+});
+
+/* ===================== ONLINE ROOM SCREEN ===================== */
+
+function resetOnlineRoomUI(){
+  $("#online-idle-card").hidden = false;
+  $("#online-host-card").hidden = true;
+  $("#online-guest-card").hidden = true;
+  $("#online-error").hidden = true;
+  $("#input-join-code").value = "";
 }
-.badge.pos-GK{ background: rgba(224,168,60,0.16); color: var(--amber); border-color: rgba(224,168,60,0.3); }
-.badge.pos-DF{ background: rgba(79,168,224,0.16); color: var(--blue); border-color: rgba(79,168,224,0.3); }
-.badge.pos-FW{ background: rgba(224,80,60,0.16); color: var(--red); border-color: rgba(224,80,60,0.3); }
-.base-price{ font-size:12.5px; color: var(--muted); }
-.base-price strong{ color: var(--cream); }
 
-.bid-display{
-  display:flex; flex-direction:column; align-items:center; gap:2px;
-  padding: 14px 0 6px;
+function showOnlineError(msg){
+  const el = $("#online-error");
+  el.textContent = msg;
+  el.hidden = false;
 }
-.bid-label{ font-size:11.5px; color: var(--muted); letter-spacing:1px; text-transform:uppercase; }
-.bid-amount{ font-size:44px; font-weight:900; font-family:'Cairo',sans-serif; color: var(--gold-light); line-height:1.1; text-shadow: 0 0 22px rgba(212,175,55,0.35); }
-.bid-unit{ font-size:12px; color: var(--muted); }
-.bidder-line{ font-size:12.5px; color: var(--muted); margin: 2px 0 12px; min-height:16px; }
 
-.timer-wrap{ display:flex; align-items:center; gap:10px; margin-bottom:12px; }
-.timer-bar{ flex:1; height:8px; border-radius:6px; background: var(--bg-deep); overflow:hidden; border:1px solid var(--panel-border); }
-.timer-fill{ height:100%; width:100%; background: linear-gradient(90deg, var(--green-pos), var(--gold)); transition: width 1s linear; }
-.timer-fill.danger{ background: linear-gradient(90deg, var(--red), var(--amber)); }
-.timer-num{ min-width:26px; font-weight:800; font-size:13px; color: var(--cream); }
-
-.turn-line{ font-size:14px; font-weight:700; color: var(--cream); margin: 0 0 4px; }
-.warn-line{ font-size:12px; color: var(--red); margin: 0 0 8px; }
-
-.bid-controls{ display:grid; grid-template-columns: repeat(3,1fr); gap:8px; margin: 10px 0 10px; }
-.btn-bid{ background: var(--panel); border:1px solid var(--panel-border); color: var(--cream); }
-.btn-bid:hover:not(:disabled){ border-color: var(--gold); color: var(--gold-light); }
-.btn-bid:disabled{ opacity:0.35; cursor:not-allowed; }
-.btn-surrender{
-  width:100%; background: rgba(224,80,60,0.14); color: var(--red); border:1px solid rgba(224,80,60,0.35);
+function generateRoomCode(){
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no ambiguous 0/O/1/I
+  let code = "";
+  for (let i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
 }
-.btn-surrender:hover:not(:disabled){ background: rgba(224,80,60,0.24); }
-.btn-surrender:disabled{ opacity:0.35; cursor:not-allowed; }
 
-/* ---------- Squads ---------- */
-.squads-wrap{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-.squad-panel{
-  background: var(--panel); border:1px solid var(--panel-border); border-radius: var(--radius-sm);
-  padding: 12px; min-width:0;
+$("#btn-create-room").addEventListener("click", () => {
+  if (!db) return;
+  const code = generateRoomCode();
+  const ref = db.ref("rooms/" + code);
+  ref.set({
+    host: { name: myOnlineName },
+    guest: null,
+    status: "waiting",
+    createdAt: Date.now(),
+  }).then(() => {
+    onlineRole = "host";
+    roomCode = code;
+    roomRef = ref;
+    saveOnlineSession();
+    $("#online-idle-card").hidden = true;
+    $("#online-host-card").hidden = false;
+    $("#room-code-display").textContent = code;
+    listenForGuestJoin();
+  }).catch(() => showOnlineError("تعذّر إنشاء الغرفة، حاول تاني"));
+});
+
+$("#btn-copy-code").addEventListener("click", () => {
+  if (!roomCode) return;
+  const finish = ok => {
+    const btn = $("#btn-copy-code");
+    const original = btn.textContent;
+    btn.textContent = ok ? "✅ اتنسخ الرمز" : "الرمز: " + roomCode;
+    setTimeout(() => { btn.textContent = original; }, 1600);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(roomCode).then(() => finish(true)).catch(() => finish(false));
+  } else {
+    finish(false);
+  }
+});
+
+$("#btn-join-room").addEventListener("click", () => {
+  if (!db) return;
+  const code = $("#input-join-code").value.trim().toUpperCase();
+  if (!code){ showOnlineError("اكتب رمز الغرفة أولاً"); return; }
+  $("#online-error").hidden = true;
+  const ref = db.ref("rooms/" + code);
+  ref.once("value").then(snap => {
+    if (!snap.exists()){ showOnlineError("مفيش غرفة بالرمز ده"); return; }
+    const room = snap.val();
+    if (room.guest){ showOnlineError("الغرفة دي مكتملة بالفعل"); return; }
+    return ref.child("guest").set({ name: myOnlineName }).then(() => {
+      onlineRole = "guest";
+      roomCode = code;
+      roomRef = ref;
+      saveOnlineSession();
+      $("#online-idle-card").hidden = true;
+      $("#online-guest-card").hidden = false;
+      listenAsGuest();
+    });
+  }).catch(() => showOnlineError("حصل خطأ، تأكد من الرمز وحاول تاني"));
+});
+
+$("#btn-online-back").addEventListener("click", () => {
+  detachRoomListeners();
+  clearOnlineSession();
+  onlineRole = null; roomCode = null; roomRef = null;
+  showScreen("screen-home");
+});
+
+function saveOnlineSession(){
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ roomCode, onlineRole, myOnlineName }));
+  } catch (e) { /* storage unavailable — ignore, resume just won't work */ }
 }
-.squad-head{ display:flex; flex-direction:column; gap:2px; margin-bottom:8px; }
-.squad-name{ font-weight:800; font-size:13px; color: var(--cream); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.squad-budget{ font-size:11px; color: var(--gold-light); }
-.squad-slots{ display:flex; flex-direction:column; gap:5px; }
-.slot{
-  display:flex; justify-content:space-between; align-items:center; gap:6px;
-  font-size:11.5px; padding:5px 8px; border-radius:7px; background: var(--bg-deep);
-  border: 1px dashed rgba(255,255,255,0.08); color: var(--muted);
+function clearOnlineSession(){
+  try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
 }
-.slot.filled{ border-style:solid; border-color: var(--panel-border); color: var(--cream); }
-.slot .slot-pos{ font-weight:800; color: var(--gold); min-width:26px; }
-.slot .slot-price{ color: var(--gold-light); font-size:10.5px; white-space:nowrap; }
 
-/* ---------- Result screen ---------- */
-.result-hero{ text-align:center; }
-.score-board{ display:flex; align-items:center; justify-content:center; gap:16px; margin: 14px 0 6px; }
-.score-side{ display:flex; flex-direction:column; align-items:center; gap:4px; min-width:90px; }
-.score-name{ font-size:12.5px; color: var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:90px; }
-.score-num{ font-size:38px; font-weight:900; font-family:'Cairo',sans-serif; color: var(--gold-light); }
-.score-sep{ font-size:22px; color: var(--muted); }
-.winner-line{ font-weight:800; font-size:15px; color: var(--win); margin-top:6px; }
-
-.app-footer{ text-align:center; padding-top:22px; }
-.app-footer p{ font-size:11px; color: var(--muted); opacity:0.6; margin:0; }
-
-@media (max-width: 360px){
-  .bid-amount{ font-size:36px; }
-  .option-grid{ grid-template-columns: 1fr; }
+/* ---------- Host side: waiting for a guest ---------- */
+function listenForGuestJoin(){
+  roomRef.child("guest").on("value", snap => {
+    const guest = snap.val();
+    if (guest && guest.name){
+      roomRef.child("guest").off();
+      beginHostSetup(guest.name);
+    }
+  });
 }
+
+function beginHostSetup(guestName){
+  state = newState();
+  state.mode = "online";
+  state.p1Name = myOnlineName;
+  state.p2Name = guestName;
+  $("#squad1-name").textContent = state.p1Name;
+  $("#squad2-name").textContent = state.p2Name;
+  showScreen("screen-setup");
+}
+
+/* ---------- Guest side: waiting for host to start ---------- */
+function listenAsGuest(){
+  roomRef.child("status").on("value", snap => {
+    const status = snap.val();
+    if (status === "playing"){
+      showScreen("screen-game");
+    } else if (status === "finished"){
+      showScreen("screen-result");
+    }
+  });
+  roomRef.child("state").on("value", snap => {
+    if (!snap.exists()) return;
+    state = snap.val();
+    normalizeStateArrays();
+    if (state.status === "finished"){
+      renderResultFromState();
+    } else if (state.currentPlayer){
+      renderGameFromState();
+    }
+  });
+  roomRef.child("host").on("value", snap => {
+    const host = snap.val();
+    if (host && host.name && $("#squad1-name")) $("#squad1-name").textContent = host.name;
+  });
+}
+
+// Firebase can drop empty arrays / turn sparse numeric objects into plain objects —
+// make sure the fields we iterate over are always real arrays.
+function normalizeStateArrays(){
+  if (!Array.isArray(state.squad1)) state.squad1 = state.squad1 ? Object.values(state.squad1) : [];
+  if (!Array.isArray(state.squad2)) state.squad2 = state.squad2 ? Object.values(state.squad2) : [];
+  if (!Array.isArray(state.pool)) state.pool = state.pool ? Object.values(state.pool) : [];
+}
+
+function detachRoomListeners(){
+  if (roomRef){
+    roomRef.child("guest").off();
+    roomRef.child("status").off();
+    roomRef.child("state").off();
+    roomRef.child("host").off();
+    roomRef.child("actions").off();
+  }
+  actionsListenerAttached = false;
+}
+
+/* ---------- Host: receive guest actions ---------- */
+function listenForActions(){
+  if (!roomRef || actionsListenerAttached) return;
+  actionsListenerAttached = true;
+  roomRef.child("actions").on("child_added", snap => {
+    const action = snap.val();
+    const key = snap.key;
+    roomRef.child("actions/" + key).remove();
+    if (!state || state.mode !== "online" || !action) return;
+    if (action.type === "bid") placeBid(Number(action.amount) || 1);
+    else if (action.type === "surrender") doSurrender();
+  });
+}
+
+/* ---------- Guest: send an action to the host ---------- */
+function sendOnlineAction(type, amount){
+  if (!roomRef) return;
+  roomRef.child("actions").push({ from: "guest", type, amount: amount || 0, ts: Date.now() });
+}
+
+/* ---------- Host: push the authoritative state to Firebase ---------- */
+function syncOnlineState(){
+  if (state.mode !== "online" || onlineRole !== "host" || !roomRef) return;
+  const payload = JSON.parse(JSON.stringify(state));
+  roomRef.child("state").set(payload);
+}
+
+/* ---------- Resume a session after a refresh ---------- */
+function tryResumeSession(){
+  if (!db) return;
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); } catch (e) {}
+  if (!saved || !saved.roomCode || !saved.onlineRole) return;
+  const ref = db.ref("rooms/" + saved.roomCode);
+  ref.once("value").then(snap => {
+    if (!snap.exists()){ clearOnlineSession(); return; }
+    const room = snap.val();
+    onlineRole = saved.onlineRole;
+    roomCode = saved.roomCode;
+    roomRef = ref;
+    myOnlineName = saved.myOnlineName || (onlineRole === "host" ? (room.host && room.host.name) : (room.guest && room.guest.name)) || "أنا";
+
+    if (onlineRole === "host"){
+      if (room.status === "waiting"){
+        showScreen("screen-online");
+        $("#online-idle-card").hidden = true;
+        $("#online-host-card").hidden = false;
+        $("#room-code-display").textContent = roomCode;
+        listenForGuestJoin();
+      } else if (room.state){
+        state = room.state; normalizeStateArrays();
+        listenForActions();
+        if (state.status === "finished"){ renderResultFromState(); showScreen("screen-result"); }
+        else { showScreen("screen-game"); renderGameFromState(); }
+      }
+    } else {
+      showScreen("screen-online");
+      $("#online-idle-card").hidden = true;
+      $("#online-guest-card").hidden = false;
+      listenAsGuest();
+    }
+  }).catch(() => clearOnlineSession());
+}
+
+/* ===================== SETUP SCREEN ===================== */
+let selectedDiff = "medium";
+$$("#difficulty-group .pill").forEach(pill => {
+  if (pill.dataset.diff === "medium") pill.classList.add("selected");
+  pill.addEventListener("click", () => {
+    selectedDiff = pill.dataset.diff;
+    $$("#difficulty-group .pill").forEach(p => p.classList.remove("selected"));
+    pill.classList.add("selected");
+  });
+});
+
+$("#slider-timer").addEventListener("input", e => {
+  const v = Number(e.target.value);
+  $("#val-timer").textContent = v === 0 ? "بدون" : v + " ث";
+});
+$("#slider-budget").addEventListener("input", e => {
+  $("#val-budget").textContent = e.target.value + " م";
+});
+
+$("#btn-setup-back").addEventListener("click", () => {
+  if (state && state.mode === "online"){
+    detachRoomListeners();
+    clearOnlineSession();
+    onlineRole = null; roomCode = null; roomRef = null;
+  }
+  showScreen("screen-home");
+});
+
+$("#btn-start-auction").addEventListener("click", () => {
+  state.difficulty = selectedDiff;
+  state.timerSetting = Number($("#slider-timer").value);
+  state.budget = Number($("#slider-budget").value);
+  state.budget1 = state.budget;
+  state.budget2 = state.budget;
+  $("#squad1-name").textContent = state.p1Name;
+  $("#squad2-name").textContent = state.p2Name;
+
+  if (state.mode === "online" && onlineRole === "host"){
+    listenForActions();
+    roomRef.update({
+      status: "playing",
+      settings: { difficulty: state.difficulty, timerSetting: state.timerSetting, budget: state.budget },
+    });
+  }
+  startAuction();
+});
+
+/* ===================== AUCTION ENGINE (runs on: local player in ai/local modes, HOST only in online mode) ===================== */
+
+function tierWeightFor(difficulty){
+  if (difficulty === "easy") return [1,1,1,1,2];
+  if (difficulty === "hard") return [3,3,3,2];
+  return [1,2,2,3];
+}
+
+function pickPlayer(position, difficulty){
+  const weights = tierWeightFor(difficulty);
+  const candidates = state.pool.filter(p => p.pos === position);
+  if (candidates.length === 0) return null;
+  let preferred = candidates.filter(p => weights.includes(p.tier));
+  const from = preferred.length ? preferred : candidates;
+  const chosen = from[Math.floor(Math.random() * from.length)];
+  state.pool = state.pool.filter(p => p !== chosen);
+  return chosen;
+}
+
+function pickConsolation(position){
+  const candidates = state.pool.filter(p => p.pos === position);
+  if (candidates.length === 0) return null;
+  const cheapestFirst = candidates.sort((a,b) => a.price - b.price);
+  const chosen = cheapestFirst[0];
+  state.pool = state.pool.filter(p => p !== chosen);
+  return chosen;
+}
+
+function startAuction(){
+  state.round = 0;
+  state.squad1 = []; state.squad2 = [];
+  renderSquads();
+  showScreen("screen-game");
+  nextRound();
+}
+
+function nextRound(){
+  state.round++;
+  if (state.round > ROUND_POSITIONS.length){
+    finishAuction();
+    return;
+  }
+  const position = ROUND_POSITIONS[state.round - 1];
+  let featured = pickPlayer(position, state.difficulty);
+  if (!featured){
+    nextRound();
+    return;
+  }
+  state.currentPlayer = featured;
+  state.consolationPlayer = pickConsolation(position);
+  state.currentBid = 0;
+  state.currentBidder = null;
+  state.activeTurn = (state.round % 2 === 1) ? 1 : 2;
+  state.timeLeft = state.timerSetting;
+
+  const minNeeded = featured.price + 1;
+  if (state.budget1 < minNeeded && state.budget2 < minNeeded){
+    resolveUnaffordableRound(featured, position);
+    return;
+  }
+
+  renderGameFromState();
+  startTimer();
+  syncOnlineState();
+  saveLocalProgress();
+}
+
+function resolveUnaffordableRound(featured, position){
+  renderGameFromState();
+  $("#turn-line").textContent = "الميزانية غير كافية لدى الطرفين — يُحسم تلقائيًا";
+  $("#bidder-line").textContent = "تسوية تلقائية";
+  $("#timer-wrap").style.display = "none";
+  $$("#bid-controls .btn-bid").forEach(b => b.disabled = true);
+  $("#btn-surrender").disabled = true;
+
+  const winner = state.budget1 >= state.budget2 ? 1 : 2;
+  const price = Math.max(0, Math.min(featured.price, currentBudget(winner)));
+  state.currentBid = price;
+  state.currentBidder = winner;
+  $("#current-bid").textContent = price;
+  syncOnlineState();
+  saveLocalProgress();
+  setTimeout(() => awardRound(winner, opponentOf(winner)), 1100);
+}
+
+function currentBudget(who){ return who === 1 ? state.budget1 : state.budget2; }
+function opponentOf(who){ return who === 1 ? 2 : 1; }
+function nameOf(who){ return who === 1 ? state.p1Name : state.p2Name; }
+
+/* Is it this browser's turn to click the buttons right now? */
+function isMyTurn(){
+  if (!state) return false;
+  if (state.mode === "ai") return state.activeTurn === 1;
+  if (state.mode === "local") return true; // pass-and-play, same device
+  if (state.mode === "online") return (onlineRole === "host" && state.activeTurn === 1) || (onlineRole === "guest" && state.activeTurn === 2);
+  return true;
+}
+
+function updateTurnLine(){
+  const isComputerTurn = state.mode === "ai" && state.activeTurn === 2;
+  $("#turn-line").textContent = isComputerTurn
+    ? "🤖 " + state.p2Name + " بيفكر..."
+    : "دور: " + nameOf(state.activeTurn);
+
+  const roleHint = $("#role-hint");
+  if (state.mode === "online"){
+    roleHint.hidden = false;
+    roleHint.textContent = isMyTurn() ? "🟢 دورك دلوقتي" : "⏳ في انتظار الطرف التاني";
+  } else {
+    roleHint.hidden = true;
+  }
+}
+
+function updateBidControlsAvailability(){
+  const mine = isMyTurn();
+  $$("#bid-controls .btn-bid").forEach(b => b.disabled = !mine);
+  const canSurrender = state.currentBidder !== null && mine;
+  $("#btn-surrender").disabled = !canSurrender;
+}
+
+/* ---------- Timer ----------
+   Every client runs its own visual countdown from state.timeLeft/timerSetting.
+   Only the authoritative side (host in online mode, or the sole local browser
+   in ai/local modes) acts on a timeout. */
+function startTimer(){
+  clearInterval(timerId);
+  const wrap = $("#timer-wrap");
+  if (state.timerSetting === 0){
+    wrap.style.display = "none";
+    maybeTriggerComputerTurn();
+    return;
+  }
+  wrap.style.display = "flex";
+  renderTimer();
+  const isAuthoritative = state.mode !== "online" || onlineRole === "host";
+  if (!isAuthoritative) return; // guest just displays what the host syncs, doesn't tick its own logic
+  timerId = setInterval(() => {
+    state.timeLeft--;
+    renderTimer();
+    if (state.timeLeft <= 0){
+      clearInterval(timerId);
+      onTimeout();
+    }
+  }, 1000);
+  maybeTriggerComputerTurn();
+}
+
+function renderTimer(){
+  const pct = Math.max(0, (state.timeLeft / state.timerSetting) * 100);
+  const fill = $("#timer-fill");
+  fill.style.width = pct + "%";
+  fill.classList.toggle("danger", state.timeLeft <= 5);
+  $("#timer-num").textContent = Math.max(0, state.timeLeft);
+}
+
+function onTimeout(){
+  const isComputerTurn = state.mode === "ai" && state.activeTurn === 2;
+  if (isComputerTurn) return; // computer AI handles its own timing
+  if (state.currentBidder === null){
+    placeBid(1);
+  } else {
+    doSurrender();
+  }
+}
+
+/* ---------- Bidding ---------- */
+$$("#bid-controls .btn-bid").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const amt = Number(btn.dataset.amt);
+    if (state.mode === "online" && onlineRole === "guest") sendOnlineAction("bid", amt);
+    else placeBid(amt);
+  });
+});
+$("#btn-surrender").addEventListener("click", () => {
+  if (state.mode === "online" && onlineRole === "guest") sendOnlineAction("surrender", 0);
+  else doSurrender();
+});
+
+function placeBid(amount){
+  const who = state.activeTurn;
+  const base = state.currentPlayer.price;
+  const newBid = state.currentBid === 0 ? base + amount : state.currentBid + amount;
+
+  if (newBid > currentBudget(who)){
+    if (state.mode !== "online" || onlineRole === "host") showWarning("الميزانية مش كفاية لهذا العرض");
+    return;
+  }
+
+  state.currentBid = newBid;
+  state.currentBidder = who;
+  state.activeTurn = opponentOf(who);
+
+  renderGameFromState();
+  startTimer();
+  syncOnlineState();
+  saveLocalProgress();
+}
+
+function showWarning(msg){
+  const w = $("#warn-line");
+  w.textContent = msg;
+  w.hidden = false;
+}
+
+function doSurrender(){
+  if (state.currentBidder === null) return;
+  clearInterval(timerId);
+  const winner = state.currentBidder;
+  const loser = opponentOf(winner);
+  awardRound(winner, loser);
+}
+
+function awardRound(winner, loser){
+  const player = state.currentPlayer;
+  const price = state.currentBid;
+  if (winner === 1){ state.budget1 -= price; state.squad1.push(player); }
+  else { state.budget2 -= price; state.squad2.push(player); }
+
+  const consolation = state.consolationPlayer;
+  if (consolation){
+    const withRating = Object.assign({}, consolation, {price: 0, awarded:true});
+    if (loser === 1) state.squad1.push(withRating);
+    else state.squad2.push(withRating);
+  }
+
+  renderSquads();
+  syncOnlineState();
+  saveLocalProgress();
+  setTimeout(nextRound, 900);
+}
+
+/* ---------- Computer AI (only used in 'ai' mode) ---------- */
+function maybeTriggerComputerTurn(){
+  if (state.mode !== "ai" || state.activeTurn !== 2) return;
+  const remainingSlots = ROUND_POSITIONS.length - state.round + 1;
+  const reserve = Math.max(0, (remainingSlots - 1) * 4);
+  const maxWillingness = Math.round(state.currentPlayer.price * (1 + Math.random() * 0.7));
+  const affordable = state.budget2 - reserve;
+
+  setTimeout(() => {
+    if (!state.currentPlayer) return;
+    const base = state.currentPlayer.price;
+    const nextMin = state.currentBid === 0 ? base + 1 : state.currentBid + 1;
+
+    if (nextMin <= maxWillingness && nextMin <= affordable && nextMin <= state.budget2){
+      const options = [1,5,10].filter(a => {
+        const bid = state.currentBid === 0 ? base + a : state.currentBid + a;
+        return bid <= affordable && bid <= maxWillingness && bid <= state.budget2;
+      });
+      if (options.length){
+        const amt = options[Math.floor(Math.random() * options.length)];
+        placeBid(amt);
+        return;
+      }
+    }
+    if (state.currentBidder !== null){
+      doSurrender();
+    } else {
+      const minBid = base + 1;
+      if (minBid <= state.budget2){ placeBid(1); }
+      else { doSurrender(); }
+    }
+  }, 700 + Math.random() * 900);
+}
+
+/* ---------- Rendering (shared by the engine owner AND by an online guest mirroring synced state) ---------- */
+function renderGameFromState(){
+  if (!state.currentPlayer) return;
+  const position = state.currentPlayer.pos;
+
+  $("#round-num").textContent = state.round;
+  $("#round-total").textContent = ROUND_POSITIONS.length;
+  $("#pos-chip").textContent = POS_ICON[position] + " " + POS_LABEL[position];
+  $("#player-jersey").textContent = POS_ICON[position];
+  $("#player-name").textContent = state.currentPlayer.name;
+  const badge = $("#player-pos-badge");
+  badge.textContent = position;
+  badge.className = "badge pos-" + position;
+  $("#player-base").textContent = state.currentPlayer.price;
+  $("#current-bid").textContent = state.currentBid;
+  $("#bidder-line").textContent = state.currentBidder ? ("أعلى عرض من: " + nameOf(state.currentBidder)) : "لا يوجد عرض بعد";
+  $("#warn-line").hidden = true;
+
+  $("#timer-wrap").style.display = state.timerSetting === 0 ? "none" : "flex";
+  if (state.timerSetting !== 0) renderTimer();
+
+  renderSquads();
+  updateTurnLine();
+  updateBidControlsAvailability();
+}
+
+/* ---------- Squad rendering ---------- */
+function slotTemplate(list, targetCount){
+  let html = "";
+  for (let i = 0; i < targetCount; i++){
+    const p = list[i];
+    if (p){
+      html += `<div class="slot filled"><span class="slot-pos">${p.pos}</span><span>${p.name}</span><span class="slot-price">${p.price}م</span></div>`;
+    } else {
+      html += `<div class="slot"><span class="slot-pos">—</span><span>فارغ</span><span></span></div>`;
+    }
+  }
+  return html;
+}
+
+function renderSquads(){
+  $("#squad1-budget").textContent = state.budget1;
+  $("#squad2-budget").textContent = state.budget2;
+  $("#squad1-slots").innerHTML = slotTemplate(state.squad1, ROUND_POSITIONS.length);
+  $("#squad2-slots").innerHTML = slotTemplate(state.squad2, ROUND_POSITIONS.length);
+}
+
+/* ===================== FINISH & MATCH SIMULATION ===================== */
+function finishAuction(){
+  clearInterval(timerId);
+  const strength1 = squadStrength(state.squad1);
+  const strength2 = squadStrength(state.squad2);
+  state.finalScore1 = simulateGoals(strength1);
+  state.finalScore2 = simulateGoals(strength2);
+
+  if (state.finalScore1 > state.finalScore2) state.winnerText = "🏆 " + state.p1Name + " بطل المزاد!";
+  else if (state.finalScore2 > state.finalScore1) state.winnerText = "🏆 " + state.p2Name + " بطل المزاد!";
+  else state.winnerText = "🤝 تعادل مثير بين الفريقين!";
+
+  // Points: win +3, draw +1, loss -2
+  if (state.finalScore1 > state.finalScore2){ state.points1 = 3; state.points2 = -2; }
+  else if (state.finalScore2 > state.finalScore1){ state.points1 = -2; state.points2 = 3; }
+  else { state.points1 = 1; state.points2 = 1; }
+
+  state.status = "finished";
+  renderResultFromState();
+  showScreen("screen-result");
+  clearLocalProgress();
+
+  // Award points once, from whichever browser is authoritative for this match
+  // (the sole local browser in ai/local modes, or the host in online mode).
+  if (state.mode !== "online" || onlineRole === "host"){
+    awardPoints(state.p1Name, state.points1);
+    awardPoints(state.p2Name, state.points2);
+  }
+
+  if (state.mode === "online" && onlineRole === "host"){
+    syncOnlineState();
+    roomRef.child("status").set("finished");
+  }
+}
+
+function renderResultFromState(){
+  $("#res-name1").textContent = state.p1Name;
+  $("#res-name2").textContent = state.p2Name;
+  $("#res-score1").textContent = state.finalScore1;
+  $("#res-score2").textContent = state.finalScore2;
+  $("#winner-line").textContent = state.winnerText;
+
+  const p1 = pointsLabel(state.points1 || 0);
+  const p2 = pointsLabel(state.points2 || 0);
+  const el1 = $("#res-points1"); el1.textContent = p1.text; el1.className = "points-delta " + p1.cls;
+  const el2 = $("#res-points2"); el2.textContent = p2.text; el2.className = "points-delta " + p2.cls;
+
+  $("#res-squad1-name").textContent = state.p1Name;
+  $("#res-squad2-name").textContent = state.p2Name;
+  $("#res-squad1-slots").innerHTML = slotTemplate(state.squad1, ROUND_POSITIONS.length);
+  $("#res-squad2-slots").innerHTML = slotTemplate(state.squad2, ROUND_POSITIONS.length);
+}
+
+function squadStrength(squad){
+  if (!squad.length) return 60;
+  const sum = squad.reduce((acc, p) => acc + (p.rating || 70), 0);
+  return sum / squad.length;
+}
+
+function simulateGoals(avgRating){
+  const chances = 10;
+  const prob = Math.min(0.62, Math.max(0.06, 0.22 + (avgRating - 78) / 90));
+  let goals = 0;
+  for (let i = 0; i < chances; i++){
+    if (Math.random() < prob) goals++;
+  }
+  return goals;
+}
+
+function resetToHome(){
+  clearInterval(timerId);
+  detachRoomListeners();
+  clearOnlineSession();
+  clearLocalProgress();
+  onlineRole = null; roomCode = null; roomRef = null;
+  showScreen("screen-home");
+  $$("#mode-grid .option-card").forEach(c => c.classList.remove("selected"));
+  $("#field-p2").hidden = true;
+  $("#input-p1").value = "";
+  $("#input-p2").value = "";
+  selectedMode = null;
+  state = null;
+}
+
+$("#btn-replay").addEventListener("click", resetToHome);
+
+$("#btn-game-home").addEventListener("click", () => {
+  const inGame = state && state.round > 0 && state.status !== "finished";
+  if (inGame && !confirm("هتخرج من المزاد الحالي وتتفقد كل التقدم — متأكد؟")) return;
+  resetToHome();
+});
+
+$("#btn-open-leaderboard").addEventListener("click", () => {
+  showScreen("screen-leaderboard");
+  loadLeaderboard();
+});
+$("#btn-leaderboard-back").addEventListener("click", () => showScreen("screen-home"));
+
+tryResumeSession();
+let hasOnlineSession = false;
+try { hasOnlineSession = !!localStorage.getItem(SESSION_KEY); } catch (e) {}
+if (!hasOnlineSession){
+  tryResumeLocalProgress();
+}
+
+} // end init()
+
+})();
