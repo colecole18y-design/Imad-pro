@@ -102,6 +102,112 @@ let roomRef = null;
 let myOnlineName = "";
 let actionsListenerAttached = false;
 const SESSION_KEY = "imadpro_online_session";
+const LOCAL_SAVE_KEY = "imadpro_local_save";
+const LEADERBOARD_KEY = "imadpro_leaderboard";
+
+/* ===================== POINTS / LEADERBOARD ===================== */
+function sanitizeKey(name){
+  return String(name).trim().replace(/[.#$\[\]\/\s]+/g, "_").slice(0, 60) || "لاعب";
+}
+
+function readLocalLeaderboard(){
+  try { return JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "{}"); }
+  catch (e) { return {}; }
+}
+
+function writeLocalLeaderboard(board){
+  try { localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(board)); } catch (e) {}
+}
+
+function awardPoints(name, delta){
+  const cleanName = String(name || "").trim();
+  if (!cleanName) return;
+
+  const board = readLocalLeaderboard();
+  const key = sanitizeKey(cleanName);
+  const prevLocal = (board[key] && board[key].points) || 0;
+  board[key] = { name: cleanName, points: prevLocal + delta };
+  writeLocalLeaderboard(board);
+
+  if (db){
+    db.ref("leaderboard/" + key).transaction(cur => {
+      const val = cur || { name: cleanName, points: 0 };
+      val.name = cleanName;
+      val.points = (val.points || 0) + delta;
+      return val;
+    });
+  }
+}
+
+function pointsLabel(delta){
+  if (delta > 0) return { text: "+" + delta + " نقطة", cls: "pos" };
+  if (delta < 0) return { text: delta + " نقطة", cls: "neg" };
+  return { text: "0 نقطة", cls: "zero" };
+}
+
+function loadLeaderboard(){
+  const listEl = $("#leaderboard-list");
+  listEl.innerHTML = '<p class="hint">جاري التحميل…</p>';
+
+  if (db){
+    db.ref("leaderboard").orderByChild("points").limitToLast(20).once("value").then(snap => {
+      const entries = [];
+      snap.forEach(child => { entries.push(child.val()); });
+      entries.reverse(); // limitToLast returns ascending order
+      renderLeaderboardList(entries);
+    }).catch(() => renderLeaderboardList(localLeaderboardAsList()));
+  } else {
+    renderLeaderboardList(localLeaderboardAsList());
+  }
+}
+
+function localLeaderboardAsList(){
+  const board = readLocalLeaderboard();
+  return Object.values(board).sort((a,b) => b.points - a.points);
+}
+
+function renderLeaderboardList(entries){
+  const listEl = $("#leaderboard-list");
+  if (!entries || !entries.length){
+    listEl.innerHTML = '<p class="hint">لسه مفيش نتايج مسجّلة — العب أول مزاد!</p>';
+    return;
+  }
+  listEl.innerHTML = entries.map((e, i) => `
+    <div class="leaderboard-row">
+      <span class="leaderboard-rank">${i+1}</span>
+      <span class="leaderboard-name">${escapeHtml(e.name)}</span>
+      <span class="leaderboard-points">${e.points}</span>
+    </div>
+  `).join("");
+}
+
+function escapeHtml(str){
+  const div = document.createElement("div");
+  div.textContent = String(str);
+  return div.innerHTML;
+}
+
+/* ===================== LOCAL AUTOSAVE (ai / local modes) ===================== */
+function saveLocalProgress(){
+  if (!state || state.mode === "online" || state.status === "finished") return;
+  try { localStorage.setItem(LOCAL_SAVE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function clearLocalProgress(){
+  try { localStorage.removeItem(LOCAL_SAVE_KEY); } catch (e) {}
+}
+function tryResumeLocalProgress(){
+  if (state) return; // an online session already took over
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(LOCAL_SAVE_KEY) || "null"); } catch (e) {}
+  if (!saved || !saved.currentPlayer || saved.status === "finished") return;
+  state = saved;
+  normalizeStateArrays();
+  $("#squad1-name").textContent = state.p1Name;
+  $("#squad2-name").textContent = state.p2Name;
+  showScreen("screen-game");
+  renderGameFromState();
+  startTimer();
+}
 
 function freshPool(){
   return PLAYERS.map(p => Object.assign({}, p));
@@ -527,6 +633,7 @@ function nextRound(){
   renderGameFromState();
   startTimer();
   syncOnlineState();
+  saveLocalProgress();
 }
 
 function resolveUnaffordableRound(featured, position){
@@ -543,6 +650,7 @@ function resolveUnaffordableRound(featured, position){
   state.currentBidder = winner;
   $("#current-bid").textContent = price;
   syncOnlineState();
+  saveLocalProgress();
   setTimeout(() => awardRound(winner, opponentOf(winner)), 1100);
 }
 
@@ -656,6 +764,7 @@ function placeBid(amount){
   renderGameFromState();
   startTimer();
   syncOnlineState();
+  saveLocalProgress();
 }
 
 function showWarning(msg){
@@ -687,6 +796,7 @@ function awardRound(winner, loser){
 
   renderSquads();
   syncOnlineState();
+  saveLocalProgress();
   setTimeout(nextRound, 900);
 }
 
@@ -783,9 +893,22 @@ function finishAuction(){
   else if (state.finalScore2 > state.finalScore1) state.winnerText = "🏆 " + state.p2Name + " بطل المزاد!";
   else state.winnerText = "🤝 تعادل مثير بين الفريقين!";
 
+  // Points: win +3, draw +1, loss -2
+  if (state.finalScore1 > state.finalScore2){ state.points1 = 3; state.points2 = -2; }
+  else if (state.finalScore2 > state.finalScore1){ state.points1 = -2; state.points2 = 3; }
+  else { state.points1 = 1; state.points2 = 1; }
+
   state.status = "finished";
   renderResultFromState();
   showScreen("screen-result");
+  clearLocalProgress();
+
+  // Award points once, from whichever browser is authoritative for this match
+  // (the sole local browser in ai/local modes, or the host in online mode).
+  if (state.mode !== "online" || onlineRole === "host"){
+    awardPoints(state.p1Name, state.points1);
+    awardPoints(state.p2Name, state.points2);
+  }
 
   if (state.mode === "online" && onlineRole === "host"){
     syncOnlineState();
@@ -799,6 +922,11 @@ function renderResultFromState(){
   $("#res-score1").textContent = state.finalScore1;
   $("#res-score2").textContent = state.finalScore2;
   $("#winner-line").textContent = state.winnerText;
+
+  const p1 = pointsLabel(state.points1 || 0);
+  const p2 = pointsLabel(state.points2 || 0);
+  const el1 = $("#res-points1"); el1.textContent = p1.text; el1.className = "points-delta " + p1.cls;
+  const el2 = $("#res-points2"); el2.textContent = p2.text; el2.className = "points-delta " + p2.cls;
 
   $("#res-squad1-name").textContent = state.p1Name;
   $("#res-squad2-name").textContent = state.p2Name;
@@ -826,6 +954,7 @@ function resetToHome(){
   clearInterval(timerId);
   detachRoomListeners();
   clearOnlineSession();
+  clearLocalProgress();
   onlineRole = null; roomCode = null; roomRef = null;
   showScreen("screen-home");
   $$("#mode-grid .option-card").forEach(c => c.classList.remove("selected"));
@@ -844,7 +973,18 @@ $("#btn-game-home").addEventListener("click", () => {
   resetToHome();
 });
 
+$("#btn-open-leaderboard").addEventListener("click", () => {
+  showScreen("screen-leaderboard");
+  loadLeaderboard();
+});
+$("#btn-leaderboard-back").addEventListener("click", () => showScreen("screen-home"));
+
 tryResumeSession();
+let hasOnlineSession = false;
+try { hasOnlineSession = !!localStorage.getItem(SESSION_KEY); } catch (e) {}
+if (!hasOnlineSession){
+  tryResumeLocalProgress();
+}
 
 } // end init()
 
