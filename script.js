@@ -91,6 +91,8 @@ const POS_ICON = {GK:"🧤", DF:"🛡️", MF:"🎯", FW:"⚡"};
 
 /* 11 rounds -> 1 GK, 4 DF, 4 MF, 2 FW — in order: keeper first, then defense, midfield, attack */
 const ROUND_POSITIONS = ["GK","DF","DF","DF","DF","MF","MF","MF","MF","FW","FW"];
+/* Formation role label per squad slot, matching ROUND_POSITIONS order (classic 4-4-2) */
+const SLOT_ROLES = ["GK","RB","CB","CB","LB","RM","CM","CM","LM","ST","ST"];
 
 /* ---------- State ---------- */
 let state = null;
@@ -739,6 +741,7 @@ function startTimer(){
     return;
   }
   wrap.style.display = "flex";
+  state.timeLeft = state.timerSetting; // fresh countdown for whoever's turn it is now
   renderTimer();
   const isAuthoritative = state.mode !== "online" || onlineRole === "host";
   if (!isAuthoritative) return; // guest just displays what the host syncs, doesn't tick its own logic
@@ -928,12 +931,22 @@ function slotTemplate(list, targetCount){
   for (let i = 0; i < targetCount; i++){
     const p = list[i];
     if (p){
-      html += `<div class="slot filled"><span class="slot-pos">${p.pos}</span><span>${p.name}</span><span class="slot-price">${p.price}م</span></div>`;
+      html += `<div class="slot filled"><span class="slot-pos">${p.pos}</span><span>${escapeHtml(p.name)}</span><span class="slot-price">${p.price}م</span></div>`;
     } else {
       html += `<div class="slot"><span class="slot-pos">—</span><span>فارغ</span><span></span></div>`;
     }
   }
   return html;
+}
+
+function resultSlotTemplate(list){
+  return SLOT_ROLES.map((role, i) => {
+    const p = list[i];
+    if (p){
+      return `<div class="slot filled"><span class="slot-pos">${role}</span><span>${escapeHtml(p.name)}</span><span class="slot-price">${p.price}م</span></div>`;
+    }
+    return `<div class="slot"><span class="slot-pos">${role}</span><span>فارغ</span><span></span></div>`;
+  }).join("");
 }
 
 function renderSquads(){
@@ -951,14 +964,22 @@ function finishAuction(){
   state.finalScore1 = simulateGoals(strength1);
   state.finalScore2 = simulateGoals(strength2);
 
-  if (state.finalScore1 > state.finalScore2) state.winnerText = "🏆 " + state.p1Name + " بطل المزاد!";
-  else if (state.finalScore2 > state.finalScore1) state.winnerText = "🏆 " + state.p2Name + " بطل المزاد!";
+  if (state.finalScore1 > state.finalScore2) state.winnerText = "🏆 الفائز: " + state.p1Name;
+  else if (state.finalScore2 > state.finalScore1) state.winnerText = "🏆 الفائز: " + state.p2Name;
   else state.winnerText = "🤝 تعادل مثير بين الفريقين!";
 
   // Points: win +3, draw +1, loss -2
   if (state.finalScore1 > state.finalScore2){ state.points1 = 3; state.points2 = -2; }
   else if (state.finalScore2 > state.finalScore1){ state.points1 = -2; state.points2 = 3; }
   else { state.points1 = 1; state.points2 = 1; }
+
+  // Match report: goal scorers, cards, best players, and stats
+  state.matchEvents = generateMatchEvents(state.squad1, state.squad2, state.finalScore1, state.finalScore2);
+  state.matchStats = generateMatchStats(strength1, strength2, state.matchEvents);
+  const best1 = pickBestPlayer(state.squad1);
+  const best2 = pickBestPlayer(state.squad2);
+  state.bestPlayer1 = best1 ? best1.name : "—";
+  state.bestPlayer2 = best2 ? best2.name : "—";
 
   state.status = "finished";
   renderResultFromState();
@@ -978,6 +999,125 @@ function finishAuction(){
   }
 }
 
+function pickBestPlayer(squad){
+  if (!squad || !squad.length) return null;
+  return squad.slice().sort((a,b) => (b.rating||0) - (a.rating||0))[0];
+}
+
+function pickWeightedScorer(squad){
+  const weighted = [];
+  (squad || []).forEach(p => {
+    let weight = 0;
+    if (p.pos === "FW") weight = 6;
+    else if (p.pos === "MF") weight = 3;
+    else if (p.pos === "DF") weight = 1;
+    for (let i = 0; i < weight; i++) weighted.push(p);
+  });
+  if (!weighted.length) return (squad && squad[0]) || { name: "لاعب" };
+  return weighted[Math.floor(Math.random() * weighted.length)];
+}
+
+function generateMatchEvents(squad1, squad2, score1, score2){
+  const events = [];
+  const usedMinutes = new Set();
+  function randMinute(){
+    let m, tries = 0;
+    do { m = 1 + Math.floor(Math.random() * 90); tries++; } while (usedMinutes.has(m) && tries < 50);
+    usedMinutes.add(m);
+    return m;
+  }
+  for (let i = 0; i < score1; i++){
+    events.push({ minute: randMinute(), type: "goal", team: 1, player: pickWeightedScorer(squad1).name });
+  }
+  for (let i = 0; i < score2; i++){
+    events.push({ minute: randMinute(), type: "goal", team: 2, player: pickWeightedScorer(squad2).name });
+  }
+  const yellow1 = Math.floor(Math.random() * 3);
+  const yellow2 = Math.floor(Math.random() * 3);
+  for (let i = 0; i < yellow1 && squad1.length; i++){
+    events.push({ minute: randMinute(), type: "yellow", team: 1, player: squad1[Math.floor(Math.random()*squad1.length)].name });
+  }
+  for (let i = 0; i < yellow2 && squad2.length; i++){
+    events.push({ minute: randMinute(), type: "yellow", team: 2, player: squad2[Math.floor(Math.random()*squad2.length)].name });
+  }
+  events.sort((a,b) => a.minute - b.minute);
+  return events;
+}
+
+function generateMatchStats(strength1, strength2, events){
+  let poss1 = Math.round(50 + (strength1 - strength2) / 2);
+  poss1 = Math.max(32, Math.min(68, poss1));
+  const poss2 = 100 - poss1;
+
+  const goals1 = events.filter(e => e.team === 1 && e.type === "goal").length;
+  const goals2 = events.filter(e => e.team === 2 && e.type === "goal").length;
+  const shots1 = Math.max(goals1 + 2, Math.round(8 + Math.random()*10 + (strength1-78)/5));
+  const shots2 = Math.max(goals2 + 2, Math.round(8 + Math.random()*10 + (strength2-78)/5));
+  const onTarget1 = Math.min(shots1, Math.max(goals1, Math.round(shots1*0.4)));
+  const onTarget2 = Math.min(shots2, Math.max(goals2, Math.round(shots2*0.4)));
+  const passes1 = Math.round(300 + poss1*4 + Math.random()*80);
+  const passes2 = Math.round(300 + poss2*4 + Math.random()*80);
+  const yellow1 = events.filter(e => e.team === 1 && e.type === "yellow").length;
+  const yellow2 = events.filter(e => e.team === 2 && e.type === "yellow").length;
+
+  return { poss1, poss2, shots1, shots2, onTarget1, onTarget2, passes1, passes2, yellow1, yellow2 };
+}
+
+function renderEventsList(events){
+  const el = $("#events-list");
+  if (!events || !events.length){
+    el.innerHTML = '<p class="hint">مباراة هادئة من غير أهداف أو بطاقات تُذكر.</p>';
+    return;
+  }
+  el.innerHTML = events.map(e => {
+    const icon = e.type === "goal" ? "⚽" : "🟨";
+    const teamName = e.team === 1 ? state.p1Name : state.p2Name;
+    return `<div class="event-row team${e.team}">
+      <span class="event-minute">${e.minute}'</span>
+      <span class="event-icon">${icon}</span>
+      <span class="event-player">${escapeHtml(e.player)}</span>
+      <span class="event-team">${escapeHtml(teamName)}</span>
+    </div>`;
+  }).join("");
+}
+
+function renderBestPlayers(){
+  const el = $("#best-players-row");
+  function card(name, teamName){
+    const safeName = name || "—";
+    return `<div class="best-player-card">
+      <div class="mini-avatar" style="background:${colorForName(safeName)}">${getInitials(safeName)}</div>
+      <span class="best-player-name">${escapeHtml(safeName)}</span>
+      <span class="best-player-team">${escapeHtml(teamName)}</span>
+      <span class="stars">⭐⭐⭐</span>
+    </div>`;
+  }
+  el.innerHTML = card(state.bestPlayer1, state.p1Name) + card(state.bestPlayer2, state.p2Name);
+}
+
+function statBlockHtml(label, v1, v2, suffix){
+  suffix = suffix || "";
+  const total = (v1 + v2) || 1;
+  const pct1 = Math.round(v1 / total * 100);
+  return `<div class="stat-block">
+    <div class="stat-label">${label}</div>
+    <div class="stat-compare">
+      <span class="stat-num">${v1}${suffix}</span>
+      <div class="stat-bar"><div class="stat-fill" style="width:${pct1}%"></div></div>
+      <span class="stat-num">${v2}${suffix}</span>
+    </div>
+  </div>`;
+}
+
+function renderStats(stats){
+  $("#stats-list").innerHTML =
+    statBlockHtml("الاستحواذ", stats.poss1, stats.poss2, "%") +
+    statBlockHtml("التسديدات", stats.shots1, stats.shots2) +
+    statBlockHtml("تسديدات على المرمى", stats.onTarget1, stats.onTarget2) +
+    statBlockHtml("التمريرات", stats.passes1, stats.passes2) +
+    statBlockHtml("البطاقات الصفراء", stats.yellow1, stats.yellow2);
+}
+
 function renderResultFromState(){
   $("#res-name1").textContent = state.p1Name;
   $("#res-name2").textContent = state.p2Name;
@@ -985,15 +1125,22 @@ function renderResultFromState(){
   $("#res-score2").textContent = state.finalScore2;
   $("#winner-line").textContent = state.winnerText;
 
+  const crest1 = $("#res-crest1"); crest1.textContent = getInitials(state.p1Name); crest1.style.background = colorForName(state.p1Name);
+  const crest2 = $("#res-crest2"); crest2.textContent = getInitials(state.p2Name); crest2.style.background = colorForName(state.p2Name);
+
   const p1 = pointsLabel(state.points1 || 0);
   const p2 = pointsLabel(state.points2 || 0);
-  const el1 = $("#res-points1"); el1.textContent = p1.text; el1.className = "points-delta " + p1.cls;
-  const el2 = $("#res-points2"); el2.textContent = p2.text; el2.className = "points-delta " + p2.cls;
+  const el1 = $("#res-points1"); el1.textContent = state.p1Name + ": " + p1.text; el1.className = "points-delta " + p1.cls;
+  const el2 = $("#res-points2"); el2.textContent = state.p2Name + ": " + p2.text; el2.className = "points-delta " + p2.cls;
+
+  renderEventsList(state.matchEvents || []);
+  renderBestPlayers();
+  renderStats(state.matchStats || { poss1:50, poss2:50, shots1:0, shots2:0, onTarget1:0, onTarget2:0, passes1:0, passes2:0, yellow1:0, yellow2:0 });
 
   $("#res-squad1-name").textContent = state.p1Name;
   $("#res-squad2-name").textContent = state.p2Name;
-  $("#res-squad1-slots").innerHTML = slotTemplate(state.squad1, ROUND_POSITIONS.length);
-  $("#res-squad2-slots").innerHTML = slotTemplate(state.squad2, ROUND_POSITIONS.length);
+  $("#res-squad1-slots").innerHTML = resultSlotTemplate(state.squad1);
+  $("#res-squad2-slots").innerHTML = resultSlotTemplate(state.squad2);
 }
 
 function squadStrength(squad){
