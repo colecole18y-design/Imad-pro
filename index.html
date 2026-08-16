@@ -30,6 +30,7 @@
         <p>مزاد النجوم — كوّن تشكيلتك من 11 لاعبًا</p>
       </div>
     </div>
+    <button class="icon-btn" id="btn-open-leaderboard" title="لوحة الترتيب">🏆</button>
   </header>
 
   <main id="app">
@@ -153,6 +154,23 @@
       <button class="btn btn-ghost" id="btn-online-back">‹ رجوع</button>
     </section>
 
+    <!-- ===================== LEADERBOARD SCREEN ===================== -->
+    <section class="screen" id="screen-leaderboard">
+      <div class="card">
+        <span class="eyebrow">التصنيف العام</span>
+        <h2>🏆 لوحة الترتيب</h2>
+        <p class="muted">فوز = +3 نقاط · تعادل = +1 نقطة · خسارة = -2 نقطة</p>
+      </div>
+
+      <div class="card">
+        <div class="leaderboard-list" id="leaderboard-list">
+          <p class="hint">جاري التحميل…</p>
+        </div>
+      </div>
+
+      <button class="btn btn-ghost" id="btn-leaderboard-back">‹ رجوع</button>
+    </section>
+
     <!-- ===================== GAME SCREEN ===================== -->
     <section class="screen" id="screen-game">
 
@@ -222,11 +240,13 @@
           <div class="score-side">
             <span class="score-name" id="res-name1">فريق 1</span>
             <span class="score-num" id="res-score1">0</span>
+            <span class="points-delta" id="res-points1"></span>
           </div>
           <span class="score-sep">—</span>
           <div class="score-side">
             <span class="score-num" id="res-score2">0</span>
             <span class="score-name" id="res-name2">فريق 2</span>
+            <span class="points-delta" id="res-points2"></span>
           </div>
         </div>
         <p class="winner-line" id="winner-line">—</p>
@@ -265,7 +285,7 @@
         <span class="link-text">تابعنا على إنستغرام</span>
         <span class="link-arrow">‹</span>
       </a>
-      <a class="link-row" href="https://github.com/your-username/your-repo" target="_blank" rel="noopener">
+      <a class="link-row" href="https://www.facebook.com/profile.php?id=61556641468455" target="_blank" rel="noopener">
         <span class="link-icon">💻</span>
         <span class="link-text">الكود المصدري</span>
         <span class="link-arrow">‹</span>
