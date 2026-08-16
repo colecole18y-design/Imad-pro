@@ -104,30 +104,33 @@ let actionsListenerAttached = false;
 const SESSION_KEY = "imadpro_online_session";
 const LOCAL_SAVE_KEY = "imadpro_local_save";
 const LEADERBOARD_KEY = "imadpro_leaderboard";
+const GUESS_LB_KEY = "imadpro_guess_leaderboard";
+const GUESS_NAME_KEY = "imadpro_guess_name";
 
-/* ===================== POINTS / LEADERBOARD ===================== */
+let currentLbTab = "auction";
+
+/* ===================== POINTS / LEADERBOARDS ===================== */
 function sanitizeKey(name){
   return String(name).trim().replace(/[.#$\[\]\/\s]+/g, "_").slice(0, 60) || "لاعب";
 }
 
-function readLocalLeaderboard(){
-  try { return JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "{}"); }
+function readLocalBoard(storageKey){
+  try { return JSON.parse(localStorage.getItem(storageKey) || "{}"); }
   catch (e) { return {}; }
 }
-
-function writeLocalLeaderboard(board){
-  try { localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(board)); } catch (e) {}
+function writeLocalBoard(storageKey, board){
+  try { localStorage.setItem(storageKey, JSON.stringify(board)); } catch (e) {}
 }
 
 function awardPoints(name, delta){
   const cleanName = String(name || "").trim();
   if (!cleanName) return;
 
-  const board = readLocalLeaderboard();
+  const board = readLocalBoard(LEADERBOARD_KEY);
   const key = sanitizeKey(cleanName);
   const prevLocal = (board[key] && board[key].points) || 0;
   board[key] = { name: cleanName, points: prevLocal + delta };
-  writeLocalLeaderboard(board);
+  writeLocalBoard(LEADERBOARD_KEY, board);
 
   if (db){
     db.ref("leaderboard/" + key).transaction(cur => {
@@ -139,44 +142,77 @@ function awardPoints(name, delta){
   }
 }
 
+function awardGuessScore(name, total){
+  const cleanName = String(name || "").trim();
+  if (!cleanName) return;
+
+  const board = readLocalBoard(GUESS_LB_KEY);
+  const key = sanitizeKey(cleanName);
+  const prevBest = (board[key] && board[key].best) || 0;
+  board[key] = { name: cleanName, best: Math.max(prevBest, total) };
+  writeLocalBoard(GUESS_LB_KEY, board);
+
+  if (db){
+    db.ref("guessLeaderboard/" + key).transaction(cur => {
+      const val = cur || { name: cleanName, best: 0 };
+      val.name = cleanName;
+      val.best = Math.max(val.best || 0, total);
+      return val;
+    });
+  }
+}
+
 function pointsLabel(delta){
   if (delta > 0) return { text: "+" + delta + " نقطة", cls: "pos" };
   if (delta < 0) return { text: delta + " نقطة", cls: "neg" };
   return { text: "0 نقطة", cls: "zero" };
 }
 
-function loadLeaderboard(){
+function loadLeaderboard(type){
+  currentLbTab = type = type || "auction";
+  const isGuess = type === "guess";
+  const path = isGuess ? "guessLeaderboard" : "leaderboard";
+  const field = isGuess ? "best" : "points";
+  const storageKey = isGuess ? GUESS_LB_KEY : LEADERBOARD_KEY;
+
+  $("#leaderboard-sub").textContent = isGuess
+    ? "أعلى نتيجة حققتها في تحدي تخمين الأسعار"
+    : "فوز = +3 نقاط · تعادل = +1 نقطة · خسارة = -2 نقطة";
+  $("#tab-lb-auction").classList.toggle("active", !isGuess);
+  $("#tab-lb-guess").classList.toggle("active", isGuess);
+
   const listEl = $("#leaderboard-list");
   listEl.innerHTML = '<p class="hint">جاري التحميل…</p>';
 
   if (db){
-    db.ref("leaderboard").orderByChild("points").limitToLast(20).once("value").then(snap => {
+    db.ref(path).orderByChild(field).limitToLast(20).once("value").then(snap => {
       const entries = [];
       snap.forEach(child => { entries.push(child.val()); });
       entries.reverse(); // limitToLast returns ascending order
-      renderLeaderboardList(entries);
-    }).catch(() => renderLeaderboardList(localLeaderboardAsList()));
+      renderLeaderboardList(entries, field);
+    }).catch(() => renderLeaderboardList(localBoardAsList(storageKey, field), field));
   } else {
-    renderLeaderboardList(localLeaderboardAsList());
+    renderLeaderboardList(localBoardAsList(storageKey, field), field);
   }
 }
 
-function localLeaderboardAsList(){
-  const board = readLocalLeaderboard();
-  return Object.values(board).sort((a,b) => b.points - a.points);
+function localBoardAsList(storageKey, field){
+  const board = readLocalBoard(storageKey);
+  return Object.values(board).sort((a,b) => (b[field]||0) - (a[field]||0));
 }
 
-function renderLeaderboardList(entries){
+function renderLeaderboardList(entries, field){
+  field = field || "points";
   const listEl = $("#leaderboard-list");
   if (!entries || !entries.length){
-    listEl.innerHTML = '<p class="hint">لسه مفيش نتايج مسجّلة — العب أول مزاد!</p>';
+    listEl.innerHTML = '<p class="hint">لسه مفيش نتايج مسجّلة — العب أول تحدي!</p>';
     return;
   }
   listEl.innerHTML = entries.map((e, i) => `
     <div class="leaderboard-row">
       <span class="leaderboard-rank">${i+1}</span>
       <span class="leaderboard-name">${escapeHtml(e.name)}</span>
-      <span class="leaderboard-points">${e.points}</span>
+      <span class="leaderboard-points">${e[field]}</span>
     </div>
   `).join("");
 }
@@ -982,7 +1018,8 @@ function resetToHome(){
   clearOnlineSession();
   clearLocalProgress();
   onlineRole = null; roomCode = null; roomRef = null;
-  showScreen("screen-home");
+  guessState = null;
+  showScreen("screen-choose-game");
   $$("#mode-grid .option-card").forEach(c => c.classList.remove("selected"));
   $("#field-p2").hidden = true;
   $("#input-p1").value = "";
@@ -1001,9 +1038,149 @@ $("#btn-game-home").addEventListener("click", () => {
 
 $("#btn-open-leaderboard").addEventListener("click", () => {
   showScreen("screen-leaderboard");
-  loadLeaderboard();
+  loadLeaderboard("auction");
 });
-$("#btn-leaderboard-back").addEventListener("click", () => showScreen("screen-home"));
+$("#btn-leaderboard-back").addEventListener("click", () => showScreen("screen-choose-game"));
+$("#tab-lb-auction").addEventListener("click", () => loadLeaderboard("auction"));
+$("#tab-lb-guess").addEventListener("click", () => loadLeaderboard("guess"));
+
+/* ===================== GAME TYPE SELECTION ===================== */
+$$("#game-type-grid .option-card").forEach(card => {
+  card.addEventListener("click", () => {
+    const game = card.dataset.game;
+    if (game === "auction"){
+      showScreen("screen-home");
+    } else if (game === "guess"){
+      let savedName = "";
+      try { savedName = localStorage.getItem(GUESS_NAME_KEY) || ""; } catch (e) {}
+      $("#guess-input-name").value = savedName;
+      $("#guess-setup-error").hidden = true;
+      $$("#guess-rounds-group .pill").forEach(p => p.classList.remove("selected"));
+      const defaultPill = $('#guess-rounds-group .pill[data-rounds="10"]');
+      if (defaultPill) defaultPill.classList.add("selected");
+      selectedGuessRounds = 10;
+      showScreen("screen-guess-setup");
+    }
+  });
+});
+$("#btn-home-back").addEventListener("click", () => showScreen("screen-choose-game"));
+
+/* ===================== GUESS-THE-PRICE GAME ===================== */
+let guessState = null;
+let selectedGuessRounds = 10;
+
+$$("#guess-rounds-group .pill").forEach(pill => {
+  pill.addEventListener("click", () => {
+    selectedGuessRounds = Number(pill.dataset.rounds);
+    $$("#guess-rounds-group .pill").forEach(p => p.classList.remove("selected"));
+    pill.classList.add("selected");
+  });
+});
+
+$("#btn-guess-setup-back").addEventListener("click", () => showScreen("screen-choose-game"));
+
+$("#btn-guess-start").addEventListener("click", () => {
+  const name = $("#guess-input-name").value.trim();
+  const errEl = $("#guess-setup-error");
+  if (!name){ errEl.textContent = "من فضلك اكتب اسمك"; errEl.hidden = false; return; }
+  errEl.hidden = true;
+  try { localStorage.setItem(GUESS_NAME_KEY, name); } catch (e) {}
+
+  const shuffled = PLAYERS.slice().sort(() => Math.random() - 0.5);
+  guessState = {
+    name,
+    rounds: selectedGuessRounds,
+    players: shuffled.slice(0, selectedGuessRounds),
+    index: 0,
+    totalScore: 0,
+  };
+  showScreen("screen-guess-game");
+  renderGuessRound();
+});
+
+function renderGuessRound(){
+  const player = guessState.players[guessState.index];
+  $("#guess-round-num").textContent = guessState.index + 1;
+  $("#guess-round-total").textContent = guessState.rounds;
+  $("#guess-score-chip").textContent = guessState.totalScore + " نقطة";
+
+  const jersey = $("#guess-player-jersey");
+  jersey.textContent = getInitials(player.name);
+  jersey.style.background = colorForName(player.name);
+
+  $("#guess-player-name").textContent = player.name;
+  $("#guess-player-club").textContent = player.club || "";
+  const badge = $("#guess-player-pos-badge");
+  badge.textContent = player.pos;
+  badge.className = "badge pos-" + player.pos;
+  $("#guess-player-rating").textContent = player.rating || "—";
+
+  $("#guess-value-input").value = 20;
+  $("#guess-input-wrap").hidden = false;
+  $("#guess-reveal").hidden = true;
+}
+
+$$(".guess-stepper .btn-bid").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const step = Number(btn.dataset.step);
+    const input = $("#guess-value-input");
+    const next = Math.max(0, (Number(input.value) || 0) + step);
+    input.value = next;
+  });
+});
+
+$("#btn-guess-submit").addEventListener("click", () => {
+  const player = guessState.players[guessState.index];
+  const guess = Math.max(0, Number($("#guess-value-input").value) || 0);
+  const actual = player.price;
+  const errPct = actual > 0 ? Math.abs(guess - actual) / actual * 100 : (guess === 0 ? 0 : 100);
+  const roundScore = Math.round(Math.max(0, 100 - errPct * 2));
+  guessState.totalScore += roundScore;
+
+  $("#guess-actual-price").textContent = actual;
+  $("#guess-score-line").textContent = "حصلت على " + roundScore + " نقطة (تخمينك: " + guess + " مليون)";
+  $("#guess-input-wrap").hidden = true;
+  $("#guess-reveal").hidden = false;
+  $("#guess-score-chip").textContent = guessState.totalScore + " نقطة";
+});
+
+$("#btn-guess-next").addEventListener("click", () => {
+  guessState.index++;
+  if (guessState.index >= guessState.rounds){
+    finishGuessGame();
+  } else {
+    renderGuessRound();
+  }
+});
+
+function finishGuessGame(){
+  awardGuessScore(guessState.name, guessState.totalScore);
+  const maxPossible = guessState.rounds * 100;
+  const pct = Math.round((guessState.totalScore / maxPossible) * 100);
+
+  $("#guess-res-name").textContent = guessState.name;
+  $("#guess-res-total").textContent = guessState.totalScore;
+  let verdict;
+  if (pct >= 85) verdict = "🏆 خبير انتقالات حقيقي!";
+  else if (pct >= 60) verdict = "👏 متابع كويس للسوق!";
+  else if (pct >= 35) verdict = "🙂 مش وحش، بس محتاج تتابع أكتر";
+  else verdict = "😅 السوق محتاج منك متابعة أكتر!";
+  $("#guess-res-line").textContent = verdict + " (" + pct + "% من أقصى نتيجة)";
+
+  showScreen("screen-guess-result");
+}
+
+$("#btn-guess-replay").addEventListener("click", () => {
+  guessState = null;
+  showScreen("screen-choose-game");
+});
+
+$("#btn-guess-home").addEventListener("click", () => {
+  const inGame = guessState && guessState.index < guessState.rounds;
+  if (inGame && !confirm("هتخرج من التحدي الحالي وتفقد تقدمك — متأكد؟")) return;
+  guessState = null;
+  showScreen("screen-choose-game");
+});
 
 tryResumeSession();
 let hasOnlineSession = false;
