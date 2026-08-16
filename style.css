@@ -238,6 +238,32 @@ button{ font-family:'Tajawal', sans-serif; }
   cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;
 }
 .icon-btn:hover{ border-color: var(--gold); }
+.btn-top-back{ margin-bottom: 4px; padding: 8px 14px; font-size:12.5px; }
+
+/* ---------- Leaderboard tabs ---------- */
+.tab-row{ display:flex; gap:8px; }
+.tab-btn{
+  flex:1; padding:10px 8px; border-radius:12px; font-size:12.5px; font-weight:700;
+  background: var(--panel); border:1px solid var(--panel-border); color: var(--muted); cursor:pointer;
+}
+.tab-btn.active{ border-color: var(--gold); color: var(--gold-light); background: rgba(212,175,55,0.1); }
+
+/* ---------- Guess-the-price ---------- */
+.guess-input-wrap{ margin-top:8px; }
+.guess-stepper{ display:flex; align-items:center; gap:6px; margin: 10px 0 14px; }
+.guess-stepper .btn-bid{ flex:0 0 auto; padding:10px 12px; font-size:13px; }
+#guess-value-input{
+  flex:1; text-align:center; font-family:'Cairo',sans-serif; font-weight:900; font-size:26px;
+  color: var(--gold-light); background: var(--bg-deep); border:1px solid var(--panel-border);
+  border-radius:12px; padding:10px 6px; -moz-appearance: textfield;
+}
+#guess-value-input::-webkit-outer-spin-button, #guess-value-input::-webkit-inner-spin-button{
+  -webkit-appearance:none; margin:0;
+}
+.guess-reveal{ margin-top:10px; }
+.guess-actual{ font-size:14px; color: var(--cream); margin: 6px 0; }
+.guess-actual strong{ color: var(--gold-light); }
+.guess-score-line{ font-size:15px; font-weight:800; color: var(--win); margin: 0 0 14px; }
 
 .spotlight-card{ text-align:center; position:relative; overflow:hidden; }
 .player-jersey{
