@@ -624,7 +624,9 @@ function nextRound(){
   state.activeTurn = (state.round % 2 === 1) ? 1 : 2;
   state.timeLeft = state.timerSetting;
 
-  const minNeeded = featured.price + 1;
+  // Safety net: this can only happen if a budget hits 0 — since bidding starts
+  // at 0 and rises by whole millions, anyone with budget ≥ 1 can always bid.
+  const minNeeded = 1;
   if (state.budget1 < minNeeded && state.budget2 < minNeeded){
     resolveUnaffordableRound(featured, position);
     return;
@@ -645,10 +647,9 @@ function resolveUnaffordableRound(featured, position){
   $("#btn-surrender").disabled = true;
 
   const winner = state.budget1 >= state.budget2 ? 1 : 2;
-  const price = Math.max(0, Math.min(featured.price, currentBudget(winner)));
-  state.currentBid = price;
+  state.currentBid = 0;
   state.currentBidder = winner;
-  $("#current-bid").textContent = price;
+  $("#current-bid").textContent = 0;
   syncOnlineState();
   saveLocalProgress();
   setTimeout(() => awardRound(winner, opponentOf(winner)), 1100);
@@ -749,8 +750,7 @@ $("#btn-surrender").addEventListener("click", () => {
 
 function placeBid(amount){
   const who = state.activeTurn;
-  const base = state.currentPlayer.price;
-  const newBid = state.currentBid === 0 ? base + amount : state.currentBid + amount;
+  const newBid = state.currentBid + amount;
 
   if (newBid > currentBudget(who)){
     if (state.mode !== "online" || onlineRole === "host") showWarning("الميزانية مش كفاية لهذا العرض");
@@ -810,12 +810,11 @@ function maybeTriggerComputerTurn(){
 
   setTimeout(() => {
     if (!state.currentPlayer) return;
-    const base = state.currentPlayer.price;
-    const nextMin = state.currentBid === 0 ? base + 1 : state.currentBid + 1;
+    const nextMin = state.currentBid + 1;
 
     if (nextMin <= maxWillingness && nextMin <= affordable && nextMin <= state.budget2){
       const options = [1,5,10].filter(a => {
-        const bid = state.currentBid === 0 ? base + a : state.currentBid + a;
+        const bid = state.currentBid + a;
         return bid <= affordable && bid <= maxWillingness && bid <= state.budget2;
       });
       if (options.length){
@@ -827,7 +826,7 @@ function maybeTriggerComputerTurn(){
     if (state.currentBidder !== null){
       doSurrender();
     } else {
-      const minBid = base + 1;
+      const minBid = state.currentBid + 1;
       if (minBid <= state.budget2){ placeBid(1); }
       else { doSurrender(); }
     }
