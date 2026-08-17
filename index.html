@@ -58,23 +58,39 @@
       </div>
 
       <div class="option-grid" id="game-type-grid">
-        <button class="option-card option-card-wide" data-game="auction">
+        <button class="option-card option-card-wide" data-game="auction" data-squad="11">
           <span class="opt-icon">⚽</span>
           <span class="opt-title">مزاد النجوم</span>
           <span class="opt-desc">مزاد على 11 لاعبًا — كوّن تشكيلتك ضد خصمك</span>
+        </button>
+        <button class="option-card option-card-wide" data-game="auction" data-squad="5">
+          <span class="opt-icon">🔥</span>
+          <span class="opt-title">مزاد الخماسي</span>
+          <span class="opt-desc">مزاد سريع على 5 لاعبين (حارس، مدافع، 2 وسط، مهاجم)</span>
         </button>
         <button class="option-card option-card-wide" data-game="guess">
           <span class="opt-icon">💰</span>
           <span class="opt-title">راجع سعرك</span>
           <span class="opt-desc">خمّن سعر انتقال اللاعب الحقيقي واكسب نقط على دقتك</span>
         </button>
+        <button class="option-card option-card-wide coming-soon" disabled>
+          <span class="opt-icon">🎁</span>
+          <span class="opt-title">صناديق الحظ <span class="soon-badge">قريبًا</span></span>
+          <span class="opt-desc">اختر لاعبك من 4 صناديق مغلقة لكل مركز</span>
+        </button>
+        <button class="option-card option-card-wide coming-soon" disabled>
+          <span class="opt-icon">🕶️</span>
+          <span class="opt-title">المزاد الأعمى <span class="soon-badge">قريبًا</span></span>
+          <span class="opt-desc">ميزانية سرية — كل واحد يكتب عرضه في السر</span>
+        </button>
       </div>
 
-      <!-- Auction: mode + name, appears under game type once "مزاد النجوم" is picked -->
+      <!-- Auction: mode + name, appears under game type once an auction variant is picked -->
       <div id="auction-config" hidden>
         <button class="btn btn-ghost btn-top-back" id="btn-auction-collapse">‹ تغيير نوع اللعبة</button>
 
         <div class="card">
+          <span class="eyebrow" id="auction-config-label">مزاد النجوم (11 لاعبًا)</span>
           <h3 class="section-title">👇 طريقة اللعب</h3>
           <div class="option-grid" id="mode-grid">
             <button class="option-card" data-mode="ai">
@@ -143,7 +159,7 @@
     <!-- ===================== SETUP SCREEN ===================== -->
     <section class="screen" id="screen-setup">
       <div class="card">
-        <span class="eyebrow">قبل البداية</span>
+        <span class="eyebrow" id="setup-format-label">مزاد النجوم (11 لاعبًا)</span>
         <h2>⚙️ ضبط إعدادات المزاد</h2>
       </div>
 
@@ -264,7 +280,6 @@
         <div class="player-jersey" id="guess-player-jersey">⚽</div>
         <h2 class="player-name" id="guess-player-name">—</h2>
         <p class="player-club" id="guess-player-club">—</p>
-        <span class="legend-badge" id="guess-player-legend-badge" hidden>🐐 أسطورة معتزلة</span>
         <div class="player-meta">
           <span class="badge" id="guess-player-pos-badge">—</span>
           <span class="stat-chip">⚡ الطاقة: <strong id="guess-player-rating">0</strong></span>
@@ -320,7 +335,6 @@
         <div class="player-jersey" id="player-jersey">⚽</div>
         <h2 class="player-name" id="player-name">—</h2>
         <p class="player-club" id="player-club">—</p>
-        <span class="legend-badge" id="player-legend-badge" hidden>🐐 أسطورة معتزلة</span>
         <div class="player-meta">
           <span class="badge" id="player-pos-badge">—</span>
           <span class="base-price">السعر الأساسي: <strong id="player-base">0</strong> م</span>
@@ -379,7 +393,7 @@
           <div class="match-team-col">
             <div class="team-crest" id="res-crest1">?</div>
             <span class="match-team-name" id="res-name1">فريق 1</span>
-            <span class="match-formation">4-4-2</span>
+            <span class="match-formation" id="res-formation1">4-4-2</span>
           </div>
           <div class="match-score-col">
             <span class="match-score-big"><span id="res-score1">0</span> - <span id="res-score2">0</span></span>
@@ -388,7 +402,7 @@
           <div class="match-team-col">
             <div class="team-crest" id="res-crest2">?</div>
             <span class="match-team-name" id="res-name2">فريق 2</span>
-            <span class="match-formation">4-4-2</span>
+            <span class="match-formation" id="res-formation2">4-4-2</span>
           </div>
         </div>
         <p class="winner-banner" id="winner-line">—</p>
