@@ -34,15 +34,45 @@ function init(){
 /* ---------- Player database ---------- */
 /* tier: 1 = famous/expensive, 2 = known, 3 = lesser known/cheap */
 const PLAYERS = [
-  // Goalkeepers
+  // ===================== Goalkeepers =====================
   {name:"أليسون بيكر", pos:"GK", price:60, rating:89, tier:1, club:"ليفربول"},
   {name:"تيبو كورتوا", pos:"GK", price:55, rating:88, tier:1, club:"ريال مدريد"},
   {name:"إيدرسون", pos:"GK", price:45, rating:86, tier:2, club:"مانشستر سيتي"},
   {name:"يان أوبلاك", pos:"GK", price:28, rating:84, tier:2, club:"أتلتيكو مدريد"},
   {name:"مانويل نوير", pos:"GK", price:15, rating:82, tier:3, club:"بايرن ميونخ"},
   {name:"ميكي إينيانا", pos:"GK", price:10, rating:78, tier:3, club:"برشلونة"},
+  {name:"إيكر كاسياس", pos:"GK", price:50, rating:88, tier:1, club:"ريال مدريد (معتزل)"},
+  {name:"جانلويجي بوفون", pos:"GK", price:45, rating:87, tier:1, club:"يوفنتوس (معتزل)"},
+  {name:"ديفيد رايا", pos:"GK", price:35, rating:85, tier:2, club:"أرسنال"},
+  {name:"ديوغو كوستا", pos:"GK", price:38, rating:85, tier:2, club:"بورتو"},
+  {name:"مايك ماينيان", pos:"GK", price:36, rating:85, tier:2, club:"ميلان"},
+  {name:"مارك أندريه تير شتيغن", pos:"GK", price:40, rating:86, tier:2, club:"برشلونة"},
+  {name:"يان سومر", pos:"GK", price:30, rating:84, tier:2, club:"إنتر ميلان"},
+  {name:"إيميليانو مارتينيز", pos:"GK", price:33, rating:85, tier:2, club:"أستون فيلا"},
+  {name:"كيبا أريزابالاغا", pos:"GK", price:18, rating:80, tier:3, club:"بورنموث"},
+  {name:"نيك بوب", pos:"GK", price:22, rating:81, tier:3, club:"نيوكاسل"},
+  {name:"جوردان بيكفورد", pos:"GK", price:24, rating:82, tier:3, club:"إيفرتون"},
+  {name:"أندريه أونانا", pos:"GK", price:26, rating:82, tier:3, club:"مانشستر يونايتد"},
+  {name:"جانلويجي دوناروما", pos:"GK", price:42, rating:86, tier:2, club:"باريس سان جيرمان"},
+  {name:"كيلور نافاس", pos:"GK", price:14, rating:80, tier:3, club:"كوستاريكا (معتزل دوليًا)"},
+  {name:"بيتر تشيك", pos:"GK", price:20, rating:84, tier:3, club:"تشيلسي (معتزل)"},
+  {name:"إدوين فان der سار", pos:"GK", price:20, rating:84, tier:3, club:"مانشستر يونايتد (معتزل)"},
+  {name:"أوليفر كان", pos:"GK", price:22, rating:85, tier:3, club:"بايرن ميونخ (معتزل)"},
+  {name:"بيتر شمايكل", pos:"GK", price:20, rating:84, tier:3, club:"مانشستر يونايتد (معتزل)"},
+  {name:"دينو زوف", pos:"GK", price:16, rating:82, tier:3, club:"إيطاليا (معتزل)"},
+  {name:"فابيان بارتيز", pos:"GK", price:14, rating:81, tier:3, club:"فرنسا (معتزل)"},
+  {name:"ديفيد سيمان", pos:"GK", price:14, rating:81, tier:3, club:"أرسنال (معتزل)"},
+  {name:"أونان سيميون", pos:"GK", price:20, rating:82, tier:3, club:"أتلتيكو مدريد"},
+  {name:"يونس بونو", pos:"GK", price:18, rating:81, tier:3, club:"الهلال"},
+  {name:"فيسنتي غوايتا", pos:"GK", price:13, rating:79, tier:3, club:"كريستال بالاس"},
+  {name:"هوغو لوريس", pos:"GK", price:12, rating:79, tier:3, club:"لوس أنجلوس إف سي"},
+  {name:"لوكاس شيفالييه", pos:"GK", price:19, rating:81, tier:3, club:"باريس سان جيرمان"},
+  {name:"أليكسندر نوبل", pos:"GK", price:9, rating:76, tier:3, club:"شتوتغارت"},
+  {name:"سام جونستون", pos:"GK", price:8, rating:75, tier:3, club:"وستهام"},
+  {name:"روي كارول", pos:"GK", price:6, rating:73, tier:3, club:"إنجلترا (معتزل)"},
+  {name:"جوردي كودينا", pos:"GK", price:7, rating:74, tier:3, club:"إسبانيول"},
 
-  // Defenders
+  // ===================== Defenders =====================
   {name:"فيرجيل فان دايك", pos:"DF", price:65, rating:90, tier:1, club:"ليفربول"},
   {name:"روبين دياز", pos:"DF", price:60, rating:88, tier:1, club:"مانشستر سيتي"},
   {name:"أنطونيو روديغر", pos:"DF", price:42, rating:86, tier:2, club:"ريال مدريد"},
@@ -55,9 +85,60 @@ const PLAYERS = [
   {name:"نيكو شلوتربيك", pos:"DF", price:20, rating:80, tier:3, club:"بوروسيا دورتموند"},
   {name:"دان بوردي", pos:"DF", price:12, rating:76, tier:3, club:"برايتون"},
   {name:"يوشكو غيندوزي", pos:"DF", price:9, rating:74, tier:3, club:"لاتسيو"},
+  {name:"باولو مالديني", pos:"DF", price:55, rating:89, tier:1, club:"ميلان (معتزل)"},
+  {name:"روبرتو كارلوس", pos:"DF", price:48, rating:87, tier:1, club:"ريال مدريد (معتزل)"},
+  {name:"إدير ميليتاو", pos:"DF", price:44, rating:86, tier:2, club:"ريال مدريد"},
+  {name:"ماركينيوس", pos:"DF", price:46, rating:86, tier:2, club:"باريس سان جيرمان"},
+  {name:"كيم مين جاي", pos:"DF", price:40, rating:85, tier:2, club:"بايرن ميونخ"},
+  {name:"إبراهيما كوناتيه", pos:"DF", price:38, rating:85, tier:2, club:"ليفربول"},
+  {name:"جول كوندي", pos:"DF", price:36, rating:84, tier:2, club:"برشلونة"},
+  {name:"كريستيان روميرو", pos:"DF", price:34, rating:84, tier:2, club:"توتنهام"},
+  {name:"ليساندرو مارتينيز", pos:"DF", price:32, rating:84, tier:2, club:"مانشستر يونايتد"},
+  {name:"تيو هيرنانديز", pos:"DF", price:45, rating:86, tier:2, club:"الهلال"},
+  {name:"ألفونسو ديفيز", pos:"DF", price:42, rating:85, tier:2, club:"بايرن ميونخ"},
+  {name:"ترينت ألكسندر أرنولد", pos:"DF", price:48, rating:86, tier:2, club:"ريال مدريد"},
+  {name:"أشرف حكيمي", pos:"DF", price:50, rating:87, tier:1, club:"باريس سان جيرمان"},
+  {name:"كايل ووكر", pos:"DF", price:20, rating:80, tier:3, club:"ميلان"},
+  {name:"ريس جيمس", pos:"DF", price:28, rating:82, tier:3, club:"تشيلسي"},
+  {name:"ماركوس كوكوريا", pos:"DF", price:24, rating:81, tier:3, club:"تشيلسي"},
+  {name:"أندرو روبرتسون", pos:"DF", price:26, rating:82, tier:3, club:"ليفربول"},
+  {name:"كيران تريبير", pos:"DF", price:18, rating:80, tier:3, club:"نيوكاسل"},
+  {name:"مانويل أكانجي", pos:"DF", price:22, rating:81, tier:3, club:"مانشستر سيتي"},
+  {name:"باو كوبارسي", pos:"DF", price:30, rating:83, tier:2, club:"برشلونة"},
+  {name:"ليفي كولويل", pos:"DF", price:16, rating:79, tier:3, club:"تشيلسي"},
+  {name:"ميكي فان دي فين", pos:"DF", price:19, rating:80, tier:3, club:"توتنهام"},
+  {name:"بييرو هينكابيه", pos:"DF", price:17, rating:80, tier:3, club:"باير ليفركوزن"},
+  {name:"سيرجيو راموس", pos:"DF", price:24, rating:83, tier:2, club:"مونتيري"},
+  {name:"جيرارد بيكيه", pos:"DF", price:36, rating:86, tier:2, club:"برشلونة (معتزل)"},
+  {name:"كارليس بويول", pos:"DF", price:32, rating:85, tier:2, club:"برشلونة (معتزل)"},
+  {name:"فابيو كانافارو", pos:"DF", price:34, rating:86, tier:2, club:"إيطاليا (معتزل)"},
+  {name:"مارسيل ديسايي", pos:"DF", price:30, rating:85, tier:2, club:"فرنسا (معتزل)"},
+  {name:"ريو فرديناند", pos:"DF", price:32, rating:85, tier:2, club:"مانشستر يونايتد (معتزل)"},
+  {name:"جون تيري", pos:"DF", price:34, rating:86, tier:2, club:"تشيلسي (معتزل)"},
+  {name:"أشلي كول", pos:"DF", price:24, rating:83, tier:2, club:"إنجلترا (معتزل)"},
+  {name:"فيليب لام", pos:"DF", price:36, rating:87, tier:1, club:"بايرن ميونخ (معتزل)"},
+  {name:"داني ألفيس", pos:"DF", price:28, rating:84, tier:2, club:"برشلونة (معتزل)"},
+  {name:"ليليان تورام", pos:"DF", price:26, rating:84, tier:2, club:"فرنسا (معتزل)"},
+  {name:"أليساندرو نيستا", pos:"DF", price:28, rating:85, tier:2, club:"إيطاليا (معتزل)"},
+  {name:"خافيير زانيتي", pos:"DF", price:26, rating:84, tier:2, club:"إنتر ميلان (معتزل)"},
+  {name:"باتريس إيفرا", pos:"DF", price:20, rating:82, tier:3, club:"مانشستر يونايتد (معتزل)"},
+  {name:"جاري نيفيل", pos:"DF", price:16, rating:80, tier:3, club:"مانشستر يونايتد (معتزل)"},
+  {name:"كافو", pos:"DF", price:26, rating:84, tier:2, club:"البرازيل (معتزل)"},
+  {name:"جورجيو كيليني", pos:"DF", price:24, rating:84, tier:2, club:"يوفنتوس (معتزل)"},
+  {name:"ليوناردو بونوتشي", pos:"DF", price:16, rating:81, tier:3, club:"إيطاليا (معتزل)"},
+  {name:"تياغو سيلفا", pos:"DF", price:14, rating:80, tier:3, club:"فلومينينسي"},
+  {name:"دافيد ألابا", pos:"DF", price:30, rating:83, tier:2, club:"ريال مدريد"},
+  {name:"بنجامين بافار", pos:"DF", price:20, rating:81, tier:3, club:"إنتر ميلان"},
+  {name:"رافائيل فاران", pos:"DF", price:18, rating:80, tier:3, club:"مانشستر يونايتد (معتزل)"},
+  {name:"ناثان أكيه", pos:"DF", price:16, rating:80, tier:3, club:"مانشستر سيتي"},
+  {name:"يوريان تيمبر", pos:"DF", price:22, rating:81, tier:3, club:"أرسنال"},
+  {name:"ويسلي فوفانا", pos:"DF", price:15, rating:79, tier:3, club:"تشيلسي"},
+  {name:"دايوت أوباميكانو", pos:"DF", price:19, rating:80, tier:3, club:"بايرن ميونخ"},
+  {name:"إيبراهيم كوناتيه الثاني", pos:"DF", price:10, rating:76, tier:3, club:"موناكو"},
+  {name:"جوناثان تاه", pos:"DF", price:14, rating:79, tier:3, club:"بايرن ميونخ"},
 
-  // Midfielders
-  {name:"كيفن دي بروين", pos:"MF", price:70, rating:90, tier:1, club:"مانشستر سيتي"},
+  // ===================== Midfielders =====================
+  {name:"كيفن دي بروين", pos:"MF", price:70, rating:90, tier:1, club:"نابولي"},
   {name:"جود بيلينغهام", pos:"MF", price:90, rating:91, tier:1, club:"ريال مدريد"},
   {name:"رودري", pos:"MF", price:75, rating:90, tier:1, club:"مانشستر سيتي"},
   {name:"بيدري", pos:"MF", price:55, rating:87, tier:2, club:"برشلونة"},
@@ -70,8 +151,54 @@ const PLAYERS = [
   {name:"كارني تشوكوميلا", pos:"MF", price:9, rating:75, tier:3, club:"برايتون"},
   {name:"رومان بورخي", pos:"MF", price:11, rating:76, tier:3, club:"فولفسبورغ"},
   {name:"أليكسيس ماك أليستر", pos:"MF", price:38, rating:84, tier:2, club:"ليفربول"},
+  {name:"زين الدين زيدان", pos:"MF", price:90, rating:93, tier:1, club:"ريال مدريد (معتزل)"},
+  {name:"أندريا بيرلو", pos:"MF", price:60, rating:89, tier:1, club:"يوفنتوس (معتزل)"},
+  {name:"ستيفن جيرارد", pos:"MF", price:58, rating:88, tier:1, club:"ليفربول (معتزل)"},
+  {name:"توني كروس", pos:"MF", price:50, rating:88, tier:2, club:"ريال مدريد (معتزل)"},
+  {name:"لوكا مودريتش", pos:"MF", price:44, rating:87, tier:2, club:"ميلان"},
+  {name:"كاسيميرو", pos:"MF", price:24, rating:82, tier:3, club:"مانشستر يونايتد"},
+  {name:"أوريلين تشواميني", pos:"MF", price:42, rating:85, tier:2, club:"ريال مدريد"},
+  {name:"إدواردو كامافينغا", pos:"MF", price:40, rating:85, tier:2, club:"ريال مدريد"},
+  {name:"مويسيس كايسيدو", pos:"MF", price:44, rating:85, tier:2, club:"تشيلسي"},
+  {name:"ميسون ماونت", pos:"MF", price:16, rating:79, tier:3, club:"مانشستر يونايتد"},
+  {name:"جيمس مادينسون", pos:"MF", price:20, rating:81, tier:3, club:"توتنهام"},
+  {name:"برونو فيرنانديز", pos:"MF", price:46, rating:86, tier:2, club:"مانشستر يونايتد"},
+  {name:"كول بالمر", pos:"MF", price:52, rating:87, tier:2, club:"تشيلسي"},
+  {name:"فلوريان فيرتز", pos:"MF", price:80, rating:89, tier:1, club:"بايرن ميونخ"},
+  {name:"جمال موسيالا", pos:"MF", price:62, rating:88, tier:1, club:"بايرن ميونخ"},
+  {name:"فرينكي دي يونغ", pos:"MF", price:26, rating:82, tier:3, club:"برشلونة"},
+  {name:"إيلكاي غوندوغان", pos:"MF", price:18, rating:80, tier:3, club:"مانشستر سيتي"},
+  {name:"توماس مولر", pos:"MF", price:12, rating:79, tier:3, club:"فانكوفر وايتكابس"},
+  {name:"سيرجيو بوسكيتس", pos:"MF", price:14, rating:79, tier:3, club:"إنتر ميامي"},
+  {name:"أندريس إنييستا", pos:"MF", price:24, rating:83, tier:2, club:"برشلونة (معتزل)"},
+  {name:"تشابي ألونسو", pos:"MF", price:22, rating:83, tier:2, club:"ريال مدريد (معتزل)"},
+  {name:"بول سكولز", pos:"MF", price:20, rating:82, tier:3, club:"مانشستر يونايتد (معتزل)"},
+  {name:"باتريك فييرا", pos:"MF", price:18, rating:82, tier:3, club:"أرسنال (معتزل)"},
+  {name:"روي كين", pos:"MF", price:16, rating:81, tier:3, club:"مانشستر يونايتد (معتزل)"},
+  {name:"مايكل بالاك", pos:"MF", price:20, rating:82, tier:3, club:"ألمانيا (معتزل)"},
+  {name:"مايكل إيسيان", pos:"MF", price:14, rating:80, tier:3, club:"تشيلسي (معتزل)"},
+  {name:"ياya توريه", pos:"MF", price:14, rating:80, tier:3, club:"مانشستر سيتي (معتزل)"},
+  {name:"كلود ماكيليلي", pos:"MF", price:12, rating:79, tier:3, club:"تشيلسي (معتزل)"},
+  {name:"ديكو", pos:"MF", price:16, rating:81, tier:3, club:"برشلونة (معتزل)"},
+  {name:"كاكا", pos:"MF", price:36, rating:86, tier:2, club:"ميلان (معتزل)"},
+  {name:"لويس فيغو", pos:"MF", price:32, rating:85, tier:2, club:"ريال مدريد (معتزل)"},
+  {name:"ديفيد بيكهام", pos:"MF", price:28, rating:84, tier:2, club:"مانشستر يونايتد (معتزل)"},
+  {name:"فرانك لامبارد", pos:"MF", price:26, rating:84, tier:2, club:"تشيلسي (معتزل)"},
+  {name:"يوهان كرويف", pos:"MF", price:38, rating:87, tier:1, club:"أياكس (معتزل)"},
+  {name:"جينارو غاتوزو", pos:"MF", price:12, rating:79, tier:3, club:"ميلان (معتزل)"},
+  {name:"إدغار ديفيدز", pos:"MF", price:12, rating:79, tier:3, club:"هولندا (معتزل)"},
+  {name:"كلارنس سيدورف", pos:"MF", price:18, rating:81, tier:3, club:"ميلان (معتزل)"},
+  {name:"روي كوستا", pos:"MF", price:16, rating:80, tier:3, club:"البرتغال (معتزل)"},
+  {name:"ماركو فيراتي", pos:"MF", price:20, rating:82, tier:3, club:"العربي القطري"},
+  {name:"نغولو كانتي", pos:"MF", price:18, rating:81, tier:3, club:"الاتحاد السعودي"},
+  {name:"بول بوغبا", pos:"MF", price:16, rating:80, tier:3, club:"موناكو"},
+  {name:"كريستيان إريكسن", pos:"MF", price:14, rating:79, tier:3, club:"مانشستر يونايتد"},
+  {name:"ماركو رويس", pos:"MF", price:12, rating:79, tier:3, club:"بايرن ميونخ"},
+  {name:"إسكو", pos:"MF", price:10, rating:77, tier:3, club:"بيتيس"},
+  {name:"دييغو كين", pos:"MF", price:7, rating:74, tier:3, club:"يوفنتوس"},
+  {name:"وارن زايري إيمري", pos:"MF", price:15, rating:79, tier:3, club:"باريس سان جيرمان"},
 
-  // Forwards
+  // ===================== Forwards =====================
   {name:"كيليان مبابي", pos:"FW", price:150, rating:94, tier:1, club:"ريال مدريد"},
   {name:"إيرلينغ هالاند", pos:"FW", price:140, rating:93, tier:1, club:"مانشستر سيتي"},
   {name:"فينيسيوس جونيور", pos:"FW", price:120, rating:92, tier:1, club:"ريال مدريد"},
@@ -84,28 +211,82 @@ const PLAYERS = [
   {name:"رسمين دورتوند", pos:"FW", price:16, rating:79, tier:3, club:"موناكو"},
   {name:"إليي وحيد", pos:"FW", price:10, rating:76, tier:3, club:"وست هام"},
   {name:"كيندري بايس", pos:"FW", price:8, rating:74, tier:3, club:"لايبزيغ"},
-
-  // Legends (retired) — a rarer, higher-profile category mixed into the pool
-  {name:"إيكر كاسياس", pos:"GK", price:50, rating:88, tier:1, club:"ريال مدريد (معتزل)", legend:true},
-  {name:"جانلويجي بوفون", pos:"GK", price:45, rating:87, tier:1, club:"يوفنتوس (معتزل)", legend:true},
-  {name:"باولو مالديني", pos:"DF", price:55, rating:89, tier:1, club:"ميلان (معتزل)", legend:true},
-  {name:"روبرتو كارلوس", pos:"DF", price:48, rating:87, tier:1, club:"ريال مدريد (معتزل)", legend:true},
-  {name:"زين الدين زيدان", pos:"MF", price:90, rating:93, tier:1, club:"ريال مدريد (معتزل)", legend:true},
-  {name:"أندريا بيرلو", pos:"MF", price:60, rating:89, tier:1, club:"يوفنتوس (معتزل)", legend:true},
-  {name:"ستيفن جيرارد", pos:"MF", price:58, rating:88, tier:1, club:"ليفربول (معتزل)", legend:true},
-  {name:"رونالدو نازاريو", pos:"FW", price:100, rating:92, tier:1, club:"ريال مدريد (معتزل)", legend:true},
-  {name:"رونالدينيو", pos:"FW", price:95, rating:91, tier:1, club:"برشلونة (معتزل)", legend:true},
-  {name:"دييغو مارادونا", pos:"FW", price:130, rating:95, tier:1, club:"نابولي (معتزل)", legend:true},
-  {name:"بيليه", pos:"FW", price:130, rating:96, tier:1, club:"سانتوس (معتزل)", legend:true},
+  {name:"رونالدو نازاريو", pos:"FW", price:100, rating:92, tier:1, club:"ريال مدريد (معتزل)"},
+  {name:"رونالدينيو", pos:"FW", price:95, rating:91, tier:1, club:"برشلونة (معتزل)"},
+  {name:"دييغو مارادونا", pos:"FW", price:130, rating:95, tier:1, club:"نابولي (معتزل)"},
+  {name:"بيليه", pos:"FW", price:130, rating:96, tier:1, club:"سانتوس (معتزل)"},
+  {name:"روبرت ليفاندوفسكي", pos:"FW", price:70, rating:89, tier:2, club:"برشلونة"},
+  {name:"كريم بنزيما", pos:"FW", price:40, rating:86, tier:2, club:"الاتحاد السعودي"},
+  {name:"محمد صلاح", pos:"FW", price:85, rating:89, tier:1, club:"ليفربول"},
+  {name:"سون هيونغ مين", pos:"FW", price:30, rating:84, tier:2, club:"لوس أنجلوس إف سي"},
+  {name:"رودريغو", pos:"FW", price:80, rating:88, tier:2, club:"ريال مدريد"},
+  {name:"نيكو ويليامز", pos:"FW", price:60, rating:86, tier:2, club:"أتلتيك بيلباو"},
+  {name:"خوليان ألفاريز", pos:"FW", price:65, rating:87, tier:2, club:"أتلتيكو مدريد"},
+  {name:"ألكسندر إيزاك", pos:"FW", price:72, rating:87, tier:2, club:"ليفربول"},
+  {name:"دارون نونيز", pos:"FW", price:35, rating:83, tier:2, club:"الهلال"},
+  {name:"سيرو غيراسي", pos:"FW", price:38, rating:84, tier:2, club:"بوروسيا دورتموند"},
+  {name:"مايكل أوليسيه", pos:"FW", price:45, rating:85, tier:2, club:"بايرن ميونخ"},
+  {name:"ليروي ساني", pos:"FW", price:20, rating:81, tier:3, club:"غلطة سراي"},
+  {name:"أنطوان غريزمان", pos:"FW", price:22, rating:82, tier:3, club:"أتلتيكو مدريد"},
+  {name:"ماركوس راشفورد", pos:"FW", price:24, rating:82, tier:3, club:"برشلونة"},
+  {name:"فيل فودين", pos:"FW", price:58, rating:87, tier:2, club:"مانشستر سيتي"},
+  {name:"جاك جريليش", pos:"FW", price:18, rating:80, tier:3, club:"إيفرتون"},
+  {name:"غابرييل جيسوس", pos:"FW", price:20, rating:81, tier:3, club:"أرسنال"},
+  {name:"تيمو فيرنر", pos:"FW", price:10, rating:76, tier:3, club:"لايبزيغ"},
+  {name:"دوسان فلاهوفيتش", pos:"FW", price:32, rating:83, tier:2, club:"يوفنتوس"},
+  {name:"راندال كولو مواني", pos:"FW", price:26, rating:82, tier:3, club:"يوفنتوس"},
+  {name:"أديمولا لوكمان", pos:"FW", price:28, rating:83, tier:2, club:"أتالانتا"},
+  {name:"خفيتشا كفاراتسخيليا", pos:"FW", price:55, rating:86, tier:2, club:"باريس سان جيرمان"},
+  {name:"رافاييل ليان", pos:"FW", price:48, rating:86, tier:2, club:"ميلان"},
+  {name:"كريستوفر نكونكو", pos:"FW", price:14, rating:79, tier:3, club:"ميلان"},
+  {name:"كودي غاكبو", pos:"FW", price:30, rating:83, tier:2, club:"ليفربول"},
+  {name:"ويسام بن يدر", pos:"FW", price:9, rating:75, tier:3, club:"موناكو"},
+  {name:"مويز كين", pos:"FW", price:12, rating:78, tier:3, club:"فيورنتينا"},
+  {name:"تيري هنري", pos:"FW", price:60, rating:89, tier:1, club:"أرسنال (معتزل)"},
+  {name:"ديدييه دروغبا", pos:"FW", price:52, rating:88, tier:1, club:"تشيلسي (معتزل)"},
+  {name:"صامويل إيتو", pos:"FW", price:48, rating:87, tier:1, club:"الكاميرون (معتزل)"},
+  {name:"روود فان نيستلروي", pos:"FW", price:44, rating:87, tier:1, club:"مانشستر يونايتد (معتزل)"},
+  {name:"آلان شيرر", pos:"FW", price:42, rating:87, tier:1, club:"نيوكاسل (معتزل)"},
+  {name:"مايكل أوين", pos:"FW", price:34, rating:85, tier:2, club:"ليفربول (معتزل)"},
+  {name:"واين روني", pos:"FW", price:38, rating:86, tier:2, club:"مانشستر يونايتد (معتزل)"},
+  {name:"فرناندو توريس", pos:"FW", price:32, rating:85, tier:2, club:"ليفربول (معتزل)"},
+  {name:"ديفيد فيا", pos:"FW", price:28, rating:84, tier:2, club:"إسبانيا (معتزل)"},
+  {name:"لويس سواريز", pos:"FW", price:20, rating:82, tier:3, club:"إنتر ميامي"},
+  {name:"زلاتان إبراهيموفيتش", pos:"FW", price:34, rating:85, tier:2, club:"ميلان (معتزل)"},
+  {name:"أندريه شيفتشينكو", pos:"FW", price:36, rating:86, tier:2, club:"ميلان (معتزل)"},
+  {name:"راؤول غونزاليس", pos:"FW", price:38, rating:86, tier:2, club:"ريال مدريد (معتزل)"},
+  {name:"فيليبو إنزاغي", pos:"FW", price:24, rating:83, tier:2, club:"ميلان (معتزل)"},
+  {name:"غابرييل باتيستوتا", pos:"FW", price:32, rating:85, tier:2, club:"الأرجنتين (معتزل)"},
+  {name:"هيرنان كريسبو", pos:"FW", price:18, rating:81, tier:3, club:"الأرجنتين (معتزل)"},
+  {name:"جورج ويا", pos:"FW", price:22, rating:83, tier:2, club:"ميلان (معتزل)"},
+  {name:"روبرتو باجيو", pos:"FW", price:30, rating:85, tier:2, club:"إيطاليا (معتزل)"},
+  {name:"فرانشيسكو توتي", pos:"FW", price:34, rating:86, tier:2, club:"روما (معتزل)"},
+  {name:"أليساندرو ديل بييرو", pos:"FW", price:30, rating:85, tier:2, club:"يوفنتوس (معتزل)"},
+  {name:"روبي فاولر", pos:"FW", price:14, rating:80, tier:3, club:"ليفربول (معتزل)"},
+  {name:"إيمانويل أديبايور", pos:"FW", price:8, rating:75, tier:3, club:"توغو (معتزل)"},
+  {name:"نيمار جونيور", pos:"FW", price:35, rating:84, tier:2, club:"سانتوس"},
+  {name:"دينيس بيرغكامب", pos:"FW", price:26, rating:84, tier:2, club:"أرسنال (معتزل)"},
 ];
 
 const POS_LABEL = {GK:"حارس مرمى", DF:"مدافع", MF:"وسط", FW:"مهاجم"};
 const POS_ICON = {GK:"🧤", DF:"🛡️", MF:"🎯", FW:"⚡"};
 
 /* 11 rounds -> 1 GK, 4 DF, 4 MF, 2 FW — in order: keeper first, then defense, midfield, attack */
-const ROUND_POSITIONS = ["GK","DF","DF","DF","DF","MF","MF","MF","MF","FW","FW"];
-/* Formation role label per squad slot, matching ROUND_POSITIONS order (classic 4-4-2) */
-const SLOT_ROLES = ["GK","RB","CB","CB","LB","RM","CM","CM","LM","ST","ST"];
+/* Auction squad formats: 11-a-side (classic) and 5-a-side ("خماسي") */
+const SQUAD_FORMATS = {
+  11: {
+    label: "مزاد النجوم (11 لاعبًا)",
+    positions: ["GK","DF","DF","DF","DF","MF","MF","MF","MF","FW","FW"],
+    roles:     ["GK","RB","CB","CB","LB","RM","CM","CM","LM","ST","ST"],
+  },
+  5: {
+    label: "مزاد الخماسي (5 لاعبين)",
+    positions: ["GK","DF","MF","MF","FW"],
+    roles:     ["GK","CB","CM","CM","ST"],
+  },
+};
+function currentPositions(){ return SQUAD_FORMATS[(state && state.squadSize) || 11].positions; }
+function currentRoles(){ return SQUAD_FORMATS[(state && state.squadSize) || 11].roles; }
 
 /* ---------- State ---------- */
 let state = null;
@@ -299,6 +480,7 @@ function freshPool(){
 function newState(){
   return {
     mode: null,               // 'ai' | 'local' | 'online'
+    squadSize: 11,             // 11 (مزاد النجوم) or 5 (مزاد الخماسي)
     p1Name: "فريق 1",
     p2Name: "فريق 2",
     difficulty: "medium",
@@ -373,8 +555,10 @@ $("#btn-to-setup").addEventListener("click", () => {
   errEl.hidden = true;
   state = newState();
   state.mode = selectedMode;
+  state.squadSize = selectedSquadSize;
   state.p1Name = p1;
   state.p2Name = p2;
+  $("#setup-format-label").textContent = SQUAD_FORMATS[state.squadSize].label;
   showScreen("screen-setup");
 });
 
@@ -533,10 +717,12 @@ function listenForGuestJoin(){
 function beginHostSetup(guestName){
   state = newState();
   state.mode = "online";
+  state.squadSize = selectedSquadSize;
   state.p1Name = myOnlineName;
   state.p2Name = guestName;
   $("#squad1-name").textContent = state.p1Name;
   $("#squad2-name").textContent = state.p2Name;
+  $("#setup-format-label").textContent = SQUAD_FORMATS[state.squadSize].label;
   showScreen("screen-setup");
 }
 
@@ -735,11 +921,11 @@ function startAuction(){
 function nextRound(){
   if (!state) return;
   state.round++;
-  if (state.round > ROUND_POSITIONS.length){
+  if (state.round > currentPositions().length){
     finishAuction();
     return;
   }
-  const position = ROUND_POSITIONS[state.round - 1];
+  const position = currentPositions()[state.round - 1];
   let featured = pickPlayer(position, state.difficulty);
   if (!featured){
     nextRound();
@@ -934,7 +1120,7 @@ function awardRound(winner, loser){
 /* ---------- Computer AI (only used in 'ai' mode) ---------- */
 function maybeTriggerComputerTurn(){
   if (!state || state.mode !== "ai" || state.activeTurn !== 2) return;
-  const remainingSlots = ROUND_POSITIONS.length - state.round + 1;
+  const remainingSlots = currentPositions().length - state.round + 1;
   const reserve = Math.max(0, (remainingSlots - 1) * 4);
   const maxWillingness = Math.round(state.currentPlayer.price * (1 + Math.random() * 0.7));
   const affordable = state.budget2 - reserve;
@@ -991,7 +1177,7 @@ function renderGameFromState(){
   const player = state.currentPlayer;
 
   $("#round-num").textContent = state.round;
-  $("#round-total").textContent = ROUND_POSITIONS.length;
+  $("#round-total").textContent = currentPositions().length;
   $("#pos-chip").textContent = POS_ICON[position] + " " + POS_LABEL[position];
 
   const jersey = $("#player-jersey");
@@ -1000,7 +1186,6 @@ function renderGameFromState(){
 
   $("#player-name").textContent = player.name;
   $("#player-club").textContent = player.club || "";
-  $("#player-legend-badge").hidden = !player.legend;
   const badge = $("#player-pos-badge");
   badge.textContent = position;
   badge.className = "badge pos-" + position;
@@ -1033,7 +1218,7 @@ function slotTemplate(list, targetCount){
 }
 
 function resultSlotTemplate(list){
-  return SLOT_ROLES.map((role, i) => {
+  return currentRoles().map((role, i) => {
     const p = list[i];
     if (p){
       return `<div class="slot filled"><span class="slot-pos">${role}</span><span>${escapeHtml(p.name)}</span><span class="slot-price">${p.price}م</span></div>`;
@@ -1045,8 +1230,8 @@ function resultSlotTemplate(list){
 function renderSquads(){
   $("#squad1-budget").textContent = state.budget1;
   $("#squad2-budget").textContent = state.budget2;
-  $("#squad1-slots").innerHTML = slotTemplate(state.squad1, ROUND_POSITIONS.length);
-  $("#squad2-slots").innerHTML = slotTemplate(state.squad2, ROUND_POSITIONS.length);
+  $("#squad1-slots").innerHTML = slotTemplate(state.squad1, currentPositions().length);
+  $("#squad2-slots").innerHTML = slotTemplate(state.squad2, currentPositions().length);
 }
 
 /* ===================== FINISH & MATCH SIMULATION ===================== */
@@ -1219,6 +1404,10 @@ function renderResultFromState(){
   $("#res-score2").textContent = state.finalScore2;
   $("#winner-line").textContent = state.winnerText;
 
+  const formationLabel = state.squadSize === 5 ? "1-2-1" : "4-4-2";
+  $("#res-formation1").textContent = formationLabel;
+  $("#res-formation2").textContent = formationLabel;
+
   const crest1 = $("#res-crest1"); crest1.textContent = getInitials(state.p1Name); crest1.style.background = colorForName(state.p1Name);
   const crest2 = $("#res-crest2"); crest2.textContent = getInitials(state.p2Name); crest2.style.background = colorForName(state.p2Name);
 
@@ -1294,6 +1483,8 @@ $("#tab-lb-auction").addEventListener("click", () => loadLeaderboard("auction"))
 $("#tab-lb-guess").addEventListener("click", () => loadLeaderboard("guess"));
 
 /* ===================== GAME TYPE SELECTION ===================== */
+let selectedSquadSize = 11;
+
 $$("#game-type-grid .option-card").forEach(card => {
   card.addEventListener("click", () => {
     const game = card.dataset.game;
@@ -1301,6 +1492,8 @@ $$("#game-type-grid .option-card").forEach(card => {
     card.classList.add("selected");
 
     if (game === "auction"){
+      selectedSquadSize = Number(card.dataset.squad) === 5 ? 5 : 11;
+      $("#auction-config-label").textContent = SQUAD_FORMATS[selectedSquadSize].label;
       $("#auction-config").hidden = false;
       $("#guess-config").hidden = true;
       $("#auction-config").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1365,7 +1558,6 @@ function renderGuessRound(){
 
   $("#guess-player-name").textContent = player.name;
   $("#guess-player-club").textContent = player.club || "";
-  $("#guess-player-legend-badge").hidden = !player.legend;
   const badge = $("#guess-player-pos-badge");
   badge.textContent = player.pos;
   badge.className = "badge pos-" + player.pos;
