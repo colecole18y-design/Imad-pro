@@ -35,12 +35,26 @@
 
   <main id="app">
 
-    <!-- ===================== GAME TYPE SELECTION SCREEN ===================== -->
+    <!-- ===================== HOME: MISSION + GAME TYPE + MODE (all in one) ===================== -->
     <section class="screen active" id="screen-choose-game">
+
+      <div class="card mission-card" id="mission-card">
+        <div class="mission-header">
+          <span class="mission-icon">🎯</span>
+          <div class="mission-text">
+            <span class="mission-title">مهمة: سجّل 300 هدف</span>
+            <span class="mission-desc">اكسب شارة "صانع الأهداف" عند الوصول</span>
+          </div>
+          <span class="mission-badge" id="mission-badge-icon">🔒</span>
+        </div>
+        <div class="mission-progress-bar"><div class="mission-progress-fill" id="mission-progress-fill"></div></div>
+        <p class="mission-progress-text" id="mission-progress-text">0 / 300 هدف</p>
+      </div>
+
       <div class="card hero-card">
         <span class="eyebrow">IMAD PRO</span>
         <h2>🎮 اختر نوع اللعبة</h2>
-        <p class="muted">لعبتين مختلفتين لعشاق الكورة — جرّب أي واحدة فيهم.</p>
+        <p class="muted">لعبتين مختلفتين لعشاق الكورة — اختار نوع اللعبة، وهتلاقي طريقة اللعب تحتها.</p>
       </div>
 
       <div class="option-grid" id="game-type-grid">
@@ -55,46 +69,74 @@
           <span class="opt-desc">خمّن سعر انتقال اللاعب الحقيقي واكسب نقط على دقتك</span>
         </button>
       </div>
-    </section>
 
-    <!-- ===================== HOME SCREEN (auction: mode + name) ===================== -->
-    <section class="screen" id="screen-home">
-      <button class="btn btn-ghost btn-top-back" id="btn-home-back">‹ رجوع لاختيار اللعبة</button>
-      <div class="card hero-card">
-        <span class="eyebrow">ابدأ مزادك</span>
-        <h2>اختر طريقة اللعب</h2>
-        <p class="muted">مزايدة تنافسية لبناء أقوى تشكيلة قبل خصمك — كل جولة نجم واحد، والصامد يفوز به.</p>
+      <!-- Auction: mode + name, appears under game type once "مزاد النجوم" is picked -->
+      <div id="auction-config" hidden>
+        <button class="btn btn-ghost btn-top-back" id="btn-auction-collapse">‹ تغيير نوع اللعبة</button>
+
+        <div class="card">
+          <h3 class="section-title">👇 طريقة اللعب</h3>
+          <div class="option-grid" id="mode-grid">
+            <button class="option-card" data-mode="ai">
+              <span class="opt-icon">🤖</span>
+              <span class="opt-title">سولو ضد الحاسوب</span>
+              <span class="opt-desc">تحدَّ الذكاء الاصطناعي وابنِ تشكيلتك بنفسك</span>
+            </button>
+            <button class="option-card" data-mode="local">
+              <span class="opt-icon">👥</span>
+              <span class="opt-title">لاعبان على نفس الجهاز</span>
+              <span class="opt-desc">تبارز صاحبك مزايدة بمزايدة على نفس الشاشة</span>
+            </button>
+            <button class="option-card option-card-wide" data-mode="online">
+              <span class="opt-icon">🌐</span>
+              <span class="opt-title">غرفة أونلاين</span>
+              <span class="opt-desc">العب مع صاحبك من جهازين مختلفين برمز غرفة</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card form-card">
+          <label class="field">
+            <span>اسمك <em>(إجباري)</em></span>
+            <input type="text" id="input-p1" maxlength="16" placeholder="مثلاً: عماد">
+          </label>
+          <label class="field" id="field-p2" hidden>
+            <span>اسم اللاعب الثاني</span>
+            <input type="text" id="input-p2" maxlength="16" placeholder="اسم صاحبك">
+          </label>
+          <p class="error-msg" id="home-error" hidden></p>
+          <button class="btn btn-gold btn-block" id="btn-to-setup">التالي ›</button>
+        </div>
       </div>
 
-      <div class="option-grid" id="mode-grid">
-        <button class="option-card" data-mode="ai">
-          <span class="opt-icon">🤖</span>
-          <span class="opt-title">سولو ضد الحاسوب</span>
-          <span class="opt-desc">تحدَّ الذكاء الاصطناعي وابنِ تشكيلتك بنفسك</span>
-        </button>
-        <button class="option-card" data-mode="local">
-          <span class="opt-icon">👥</span>
-          <span class="opt-title">لاعبان على نفس الجهاز</span>
-          <span class="opt-desc">تبارز صاحبك مزايدة بمزايدة على نفس الشاشة</span>
-        </button>
-        <button class="option-card option-card-wide" data-mode="online">
-          <span class="opt-icon">🌐</span>
-          <span class="opt-title">غرفة أونلاين</span>
-          <span class="opt-desc">العب مع صاحبك من جهازين مختلفين برمز غرفة</span>
-        </button>
-      </div>
+      <!-- Guess-the-price: name + rounds, appears under game type once "راجع سعرك" is picked -->
+      <div id="guess-config" hidden>
+        <button class="btn btn-ghost btn-top-back" id="btn-guess-collapse">‹ تغيير نوع اللعبة</button>
 
-      <div class="card form-card">
-        <label class="field">
-          <span>اسمك <em>(إجباري)</em></span>
-          <input type="text" id="input-p1" maxlength="16" placeholder="مثلاً: عماد">
-        </label>
-        <label class="field" id="field-p2" hidden>
-          <span>اسم اللاعب الثاني</span>
-          <input type="text" id="input-p2" maxlength="16" placeholder="اسم صاحبك">
-        </label>
-        <p class="error-msg" id="home-error" hidden></p>
-        <button class="btn btn-gold btn-block" id="btn-to-setup">التالي ›</button>
+        <div class="card form-card">
+          <label class="field">
+            <span>اسمك <em>(إجباري)</em></span>
+            <input type="text" id="guess-input-name" maxlength="16" placeholder="مثلاً: عماد">
+          </label>
+          <p class="error-msg" id="guess-setup-error" hidden></p>
+        </div>
+
+        <div class="card">
+          <h3 class="section-title">🔢 عدد الجولات</h3>
+          <div class="pill-group" id="guess-rounds-group">
+            <button class="pill" data-rounds="5">
+              <strong>5 لاعبين</strong><small>تحدي سريع</small>
+            </button>
+            <button class="pill" data-rounds="10">
+              <strong>10 لاعبين</strong><small>تحدي متوسط</small>
+            </button>
+            <button class="pill" data-rounds="20">
+              <strong>20 لاعب</strong><small>التحدي الكامل</small>
+            </button>
+          </div>
+        </div>
+
+        <button class="btn btn-gold btn-block" id="btn-guess-start">ابدأ التحدي</button>
       </div>
     </section>
 
@@ -159,6 +201,16 @@
           <input type="text" id="input-join-code" maxlength="6" placeholder="اكتب رمز الغرفة">
           <button class="btn btn-bid" id="btn-join-room">دخول ➜</button>
         </div>
+
+        <div class="open-rooms-block">
+          <div class="open-rooms-head">
+            <h3 class="section-title">🔀 غرف مفتوحة</h3>
+            <button class="icon-btn" id="btn-refresh-rooms" title="تحديث">🔄</button>
+          </div>
+          <div class="open-rooms-list" id="open-rooms-list">
+            <p class="hint">جاري البحث عن غرف مفتوحة…</p>
+          </div>
+        </div>
       </div>
 
       <div class="card" id="online-host-card" hidden>
@@ -199,43 +251,6 @@
       <button class="btn btn-ghost" id="btn-leaderboard-back">‹ رجوع</button>
     </section>
 
-    <!-- ===================== GUESS-THE-PRICE: SETUP ===================== -->
-    <section class="screen" id="screen-guess-setup">
-      <div class="card">
-        <span class="eyebrow">راجع سعرك</span>
-        <h2>💰 قد إيه تعرف أسعار النجوم؟</h2>
-        <p class="muted">هيتعرض عليك لاعب واحد كل مرة، وانت تحاول تحزر سعره الحقيقي بالمليون — قد ما تكون قريب من الرقم، قد ما تكسب نقط أكتر.</p>
-      </div>
-
-      <div class="card form-card">
-        <label class="field">
-          <span>اسمك <em>(إجباري)</em></span>
-          <input type="text" id="guess-input-name" maxlength="16" placeholder="مثلاً: عماد">
-        </label>
-        <p class="error-msg" id="guess-setup-error" hidden></p>
-      </div>
-
-      <div class="card">
-        <h3 class="section-title">🔢 عدد الجولات</h3>
-        <div class="pill-group" id="guess-rounds-group">
-          <button class="pill" data-rounds="5">
-            <strong>5 لاعبين</strong><small>تحدي سريع</small>
-          </button>
-          <button class="pill" data-rounds="10">
-            <strong>10 لاعبين</strong><small>تحدي متوسط</small>
-          </button>
-          <button class="pill" data-rounds="20">
-            <strong>20 لاعب</strong><small>التحدي الكامل</small>
-          </button>
-        </div>
-      </div>
-
-      <div class="actions-row">
-        <button class="btn btn-ghost" id="btn-guess-setup-back">‹ رجوع</button>
-        <button class="btn btn-gold btn-block" id="btn-guess-start">ابدأ التحدي</button>
-      </div>
-    </section>
-
     <!-- ===================== GUESS-THE-PRICE: GAME ===================== -->
     <section class="screen" id="screen-guess-game">
       <div class="game-topbar">
@@ -249,6 +264,7 @@
         <div class="player-jersey" id="guess-player-jersey">⚽</div>
         <h2 class="player-name" id="guess-player-name">—</h2>
         <p class="player-club" id="guess-player-club">—</p>
+        <span class="legend-badge" id="guess-player-legend-badge" hidden>🐐 أسطورة معتزلة</span>
         <div class="player-meta">
           <span class="badge" id="guess-player-pos-badge">—</span>
           <span class="stat-chip">⚡ الطاقة: <strong id="guess-player-rating">0</strong></span>
@@ -304,6 +320,7 @@
         <div class="player-jersey" id="player-jersey">⚽</div>
         <h2 class="player-name" id="player-name">—</h2>
         <p class="player-club" id="player-club">—</p>
+        <span class="legend-badge" id="player-legend-badge" hidden>🐐 أسطورة معتزلة</span>
         <div class="player-meta">
           <span class="badge" id="player-pos-badge">—</span>
           <span class="base-price">السعر الأساسي: <strong id="player-base">0</strong> م</span>
