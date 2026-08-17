@@ -113,6 +113,23 @@ button{ font-family:'Tajawal', sans-serif; }
 .card h2{ font-size:19px; color: var(--cream); margin-bottom:6px; }
 .muted{ color: var(--muted); font-size:13.5px; line-height:1.7; margin:0; }
 
+/* ---------- Mission card ---------- */
+.mission-card{ padding: 16px 18px; }
+.mission-header{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.mission-icon{ font-size:22px; }
+.mission-text{ flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
+.mission-title{ font-size:13.5px; font-weight:800; color: var(--cream); }
+.mission-desc{ font-size:11px; color: var(--muted); }
+.mission-badge{ font-size:24px; filter: grayscale(1) opacity(0.5); transition: 0.3s ease; }
+.mission-progress-bar{ height:8px; border-radius:6px; background: var(--bg-deep); overflow:hidden; border:1px solid var(--panel-border); }
+.mission-progress-fill{ height:100%; width:0%; background: linear-gradient(90deg, var(--green-pos), var(--gold)); transition: width 0.6s ease; }
+.mission-progress-text{ font-size:11.5px; color: var(--muted); margin: 6px 0 0; text-align:center; }
+.mission-card.earned{ border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset, 0 12px 28px rgba(212,175,55,0.18); }
+.mission-card.earned .mission-badge{ filter:none; animation: badge-pulse 1.8s ease-in-out infinite; }
+.mission-card.earned .mission-title{ color: var(--gold-light); }
+@keyframes badge-pulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.15); } }
+@media (prefers-reduced-motion: reduce){ .mission-card.earned .mission-badge{ animation:none; } }
+
 /* ---------- Home: mode options ---------- */
 .option-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
 .option-card-wide{ grid-column: 1 / -1; flex-direction:row; align-items:center; gap:12px; }
@@ -197,6 +214,17 @@ button{ font-family:'Tajawal', sans-serif; }
 
 /* ---------- Online room screen ---------- */
 .or-sep{ text-align:center; color: var(--muted); font-size:12px; margin: 14px 0 10px; }
+
+.open-rooms-block{ margin-top: 18px; }
+.open-rooms-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.open-rooms-head .section-title{ margin:0; }
+.open-rooms-list{ display:flex; flex-direction:column; gap:8px; }
+.open-room-row{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  background: var(--bg-deep); border:1px solid var(--panel-border); border-radius:10px; padding:10px 12px;
+}
+.open-room-host{ font-size:13px; font-weight:700; color: var(--cream); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.open-room-join-btn{ flex-shrink:0; padding:8px 14px; font-size:12.5px; }
 .join-row{ display:flex; gap:8px; }
 .join-row input{
   flex:1; background: var(--bg-deep); border:1px solid var(--panel-border); border-radius:10px;
@@ -276,6 +304,11 @@ button{ font-family:'Tajawal', sans-serif; }
 }
 .player-name{ font-size:21px; color: var(--cream); margin-bottom:2px; }
 .player-club{ font-size:12px; color: var(--muted); margin: 0 0 10px; }
+.legend-badge{
+  display:inline-block; font-size:10.5px; font-weight:800; color:#1a1405;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  padding:3px 12px; border-radius:8px; margin: -4px 0 12px;
+}
 .player-meta{ display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
 .player-stats{ display:flex; justify-content:center; margin-bottom:14px; }
 .stat-chip{
