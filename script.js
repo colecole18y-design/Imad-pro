@@ -84,6 +84,19 @@ const PLAYERS = [
   {name:"رسمين دورتوند", pos:"FW", price:16, rating:79, tier:3, club:"موناكو"},
   {name:"إليي وحيد", pos:"FW", price:10, rating:76, tier:3, club:"وست هام"},
   {name:"كيندري بايس", pos:"FW", price:8, rating:74, tier:3, club:"لايبزيغ"},
+
+  // Legends (retired) — a rarer, higher-profile category mixed into the pool
+  {name:"إيكر كاسياس", pos:"GK", price:50, rating:88, tier:1, club:"ريال مدريد (معتزل)", legend:true},
+  {name:"جانلويجي بوفون", pos:"GK", price:45, rating:87, tier:1, club:"يوفنتوس (معتزل)", legend:true},
+  {name:"باولو مالديني", pos:"DF", price:55, rating:89, tier:1, club:"ميلان (معتزل)", legend:true},
+  {name:"روبرتو كارلوس", pos:"DF", price:48, rating:87, tier:1, club:"ريال مدريد (معتزل)", legend:true},
+  {name:"زين الدين زيدان", pos:"MF", price:90, rating:93, tier:1, club:"ريال مدريد (معتزل)", legend:true},
+  {name:"أندريا بيرلو", pos:"MF", price:60, rating:89, tier:1, club:"يوفنتوس (معتزل)", legend:true},
+  {name:"ستيفن جيرارد", pos:"MF", price:58, rating:88, tier:1, club:"ليفربول (معتزل)", legend:true},
+  {name:"رونالدو نازاريو", pos:"FW", price:100, rating:92, tier:1, club:"ريال مدريد (معتزل)", legend:true},
+  {name:"رونالدينيو", pos:"FW", price:95, rating:91, tier:1, club:"برشلونة (معتزل)", legend:true},
+  {name:"دييغو مارادونا", pos:"FW", price:130, rating:95, tier:1, club:"نابولي (معتزل)", legend:true},
+  {name:"بيليه", pos:"FW", price:130, rating:96, tier:1, club:"سانتوس (معتزل)", legend:true},
 ];
 
 const POS_LABEL = {GK:"حارس مرمى", DF:"مدافع", MF:"وسط", FW:"مهاجم"};
@@ -187,7 +200,7 @@ function loadLeaderboard(type){
   listEl.innerHTML = '<p class="hint">جاري التحميل…</p>';
 
   if (db){
-    db.ref(path).orderByChild(field).limitToLast(20).once("value").then(snap => {
+    db.ref(path).orderByChild(field).limitToLast(10).once("value").then(snap => {
       const entries = [];
       snap.forEach(child => { entries.push(child.val()); });
       entries.reverse(); // limitToLast returns ascending order
@@ -200,7 +213,7 @@ function loadLeaderboard(type){
 
 function localBoardAsList(storageKey, field){
   const board = readLocalBoard(storageKey);
-  return Object.values(board).sort((a,b) => (b[field]||0) - (a[field]||0));
+  return Object.values(board).sort((a,b) => (b[field]||0) - (a[field]||0)).slice(0, 10);
 }
 
 function renderLeaderboardList(entries, field){
@@ -223,6 +236,38 @@ function escapeHtml(str){
   const div = document.createElement("div");
   div.textContent = String(str);
   return div.innerHTML;
+}
+
+/* ===================== MISSION / BADGE ===================== */
+const MISSION_KEY = "imadpro_mission_progress";
+const MISSION_GOAL = 300;
+
+function readMissionProgress(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(MISSION_KEY) || "null");
+    if (saved && typeof saved.goals === "number") return saved;
+  } catch (e) {}
+  return { goals: 0, badgeEarned: false };
+}
+function writeMissionProgress(p){
+  try { localStorage.setItem(MISSION_KEY, JSON.stringify(p)); } catch (e) {}
+}
+function addMissionGoals(n){
+  if (!n) return;
+  const p = readMissionProgress();
+  p.goals += n;
+  if (p.goals >= MISSION_GOAL) p.badgeEarned = true;
+  writeMissionProgress(p);
+  renderMissionCard();
+}
+function renderMissionCard(){
+  const p = readMissionProgress();
+  const shown = Math.min(p.goals, MISSION_GOAL);
+  const pct = Math.round(shown / MISSION_GOAL * 100);
+  $("#mission-progress-fill").style.width = pct + "%";
+  $("#mission-progress-text").textContent = shown + " / " + MISSION_GOAL + " هدف" + (p.badgeEarned ? " ✅" : "");
+  $("#mission-badge-icon").textContent = p.badgeEarned ? "🏅" : "🔒";
+  $("#mission-card").classList.toggle("earned", p.badgeEarned);
 }
 
 /* ===================== LOCAL AUTOSAVE (ai / local modes) ===================== */
@@ -341,6 +386,7 @@ function resetOnlineRoomUI(){
   $("#online-guest-card").hidden = true;
   $("#online-error").hidden = true;
   $("#input-join-code").value = "";
+  loadOpenRooms();
 }
 
 function showOnlineError(msg){
@@ -392,9 +438,9 @@ $("#btn-copy-code").addEventListener("click", () => {
   }
 });
 
-$("#btn-join-room").addEventListener("click", () => {
-  if (!db) return;
-  const code = $("#input-join-code").value.trim().toUpperCase();
+function joinRoomByCode(code){
+  if (!db || !code) return;
+  code = code.trim().toUpperCase();
   if (!code){ showOnlineError("اكتب رمز الغرفة أولاً"); return; }
   $("#online-error").hidden = true;
   const ref = db.ref("rooms/" + code);
@@ -412,13 +458,56 @@ $("#btn-join-room").addEventListener("click", () => {
       listenAsGuest();
     });
   }).catch(() => showOnlineError("حصل خطأ، تأكد من الرمز وحاول تاني"));
+}
+
+$("#btn-join-room").addEventListener("click", () => {
+  joinRoomByCode($("#input-join-code").value);
 });
+
+/* ---------- Browse open rooms (public list of hosts waiting for a guest) ---------- */
+function loadOpenRooms(){
+  const el = $("#open-rooms-list");
+  if (!el) return;
+  if (!db){ el.innerHTML = '<p class="hint">مش متاح دلوقتي</p>'; return; }
+  el.innerHTML = '<p class="hint">جاري البحث عن غرف مفتوحة…</p>';
+  db.ref("rooms").limitToLast(30).once("value").then(snap => {
+    const rooms = [];
+    const twoHours = 2 * 60 * 60 * 1000;
+    snap.forEach(child => {
+      const r = child.val();
+      if (r && r.status === "waiting" && r.host && r.host.name && (Date.now() - (r.createdAt || 0) < twoHours)){
+        rooms.push({ code: child.key, hostName: r.host.name, createdAt: r.createdAt || 0 });
+      }
+    });
+    rooms.sort((a,b) => b.createdAt - a.createdAt);
+    renderOpenRooms(rooms.slice(0, 8));
+  }).catch(() => { el.innerHTML = '<p class="hint">تعذّر تحميل الغرف المفتوحة</p>'; });
+}
+
+function renderOpenRooms(rooms){
+  const el = $("#open-rooms-list");
+  if (!rooms.length){
+    el.innerHTML = '<p class="hint">مفيش غرف مفتوحة دلوقتي — اعمل غرفة جديدة وشارك الرمز!</p>';
+    return;
+  }
+  el.innerHTML = rooms.map(r => `
+    <div class="open-room-row">
+      <span class="open-room-host">👤 ${escapeHtml(r.hostName)}</span>
+      <button class="btn btn-bid open-room-join-btn" data-code="${escapeHtml(r.code)}">انضم ➜</button>
+    </div>
+  `).join("");
+  $$(".open-room-join-btn").forEach(btn => {
+    btn.addEventListener("click", () => joinRoomByCode(btn.dataset.code));
+  });
+}
+
+$("#btn-refresh-rooms").addEventListener("click", loadOpenRooms);
 
 $("#btn-online-back").addEventListener("click", () => {
   detachRoomListeners();
   clearOnlineSession();
   onlineRole = null; roomCode = null; roomRef = null;
-  showScreen("screen-home");
+  showScreen("screen-choose-game");
 });
 
 function saveOnlineSession(){
@@ -585,7 +674,7 @@ $("#btn-setup-back").addEventListener("click", () => {
     clearOnlineSession();
     onlineRole = null; roomCode = null; roomRef = null;
   }
-  showScreen("screen-home");
+  showScreen("screen-choose-game");
 });
 
 $("#btn-start-auction").addEventListener("click", () => {
@@ -644,6 +733,7 @@ function startAuction(){
 }
 
 function nextRound(){
+  if (!state) return;
   state.round++;
   if (state.round > ROUND_POSITIONS.length){
     finishAuction();
@@ -788,6 +878,7 @@ $("#btn-surrender").addEventListener("click", () => {
 });
 
 function placeBid(amount){
+  if (!state || !state.currentPlayer) return;
   const who = state.activeTurn;
   const newBid = state.currentBid + amount;
 
@@ -813,7 +904,7 @@ function showWarning(msg){
 }
 
 function doSurrender(){
-  if (state.currentBidder === null) return;
+  if (!state || state.currentBidder === null) return;
   clearInterval(timerId);
   const winner = state.currentBidder;
   const loser = opponentOf(winner);
@@ -821,6 +912,7 @@ function doSurrender(){
 }
 
 function awardRound(winner, loser){
+  if (!state) return;
   const player = state.currentPlayer;
   const price = state.currentBid;
   if (winner === 1){ state.budget1 -= price; state.squad1.push(player); }
@@ -841,14 +933,14 @@ function awardRound(winner, loser){
 
 /* ---------- Computer AI (only used in 'ai' mode) ---------- */
 function maybeTriggerComputerTurn(){
-  if (state.mode !== "ai" || state.activeTurn !== 2) return;
+  if (!state || state.mode !== "ai" || state.activeTurn !== 2) return;
   const remainingSlots = ROUND_POSITIONS.length - state.round + 1;
   const reserve = Math.max(0, (remainingSlots - 1) * 4);
   const maxWillingness = Math.round(state.currentPlayer.price * (1 + Math.random() * 0.7));
   const affordable = state.budget2 - reserve;
 
   setTimeout(() => {
-    if (!state.currentPlayer) return;
+    if (!state || !state.currentPlayer) return;
     const nextMin = state.currentBid + 1;
 
     if (nextMin <= maxWillingness && nextMin <= affordable && nextMin <= state.budget2){
@@ -908,6 +1000,7 @@ function renderGameFromState(){
 
   $("#player-name").textContent = player.name;
   $("#player-club").textContent = player.club || "";
+  $("#player-legend-badge").hidden = !player.legend;
   const badge = $("#player-pos-badge");
   badge.textContent = position;
   badge.className = "badge pos-" + position;
@@ -991,6 +1084,7 @@ function finishAuction(){
   if (state.mode !== "online" || onlineRole === "host"){
     awardPoints(state.p1Name, state.points1);
     awardPoints(state.p2Name, state.points2);
+    addMissionGoals(state.finalScore1 + state.finalScore2);
   }
 
   if (state.mode === "online" && onlineRole === "host"){
@@ -1159,6 +1253,12 @@ function simulateGoals(avgRating){
   return goals;
 }
 
+function collapseGameConfig(){
+  $("#auction-config").hidden = true;
+  $("#guess-config").hidden = true;
+  $$("#game-type-grid .option-card").forEach(c => c.classList.remove("selected"));
+}
+
 function resetToHome(){
   clearInterval(timerId);
   detachRoomListeners();
@@ -1167,12 +1267,14 @@ function resetToHome(){
   onlineRole = null; roomCode = null; roomRef = null;
   guessState = null;
   showScreen("screen-choose-game");
+  collapseGameConfig();
   $$("#mode-grid .option-card").forEach(c => c.classList.remove("selected"));
   $("#field-p2").hidden = true;
   $("#input-p1").value = "";
   $("#input-p2").value = "";
   selectedMode = null;
   state = null;
+  renderMissionCard();
 }
 
 $("#btn-replay").addEventListener("click", resetToHome);
@@ -1195,8 +1297,13 @@ $("#tab-lb-guess").addEventListener("click", () => loadLeaderboard("guess"));
 $$("#game-type-grid .option-card").forEach(card => {
   card.addEventListener("click", () => {
     const game = card.dataset.game;
+    $$("#game-type-grid .option-card").forEach(c => c.classList.remove("selected"));
+    card.classList.add("selected");
+
     if (game === "auction"){
-      showScreen("screen-home");
+      $("#auction-config").hidden = false;
+      $("#guess-config").hidden = true;
+      $("#auction-config").scrollIntoView({ behavior: "smooth", block: "start" });
     } else if (game === "guess"){
       let savedName = "";
       try { savedName = localStorage.getItem(GUESS_NAME_KEY) || ""; } catch (e) {}
@@ -1206,11 +1313,14 @@ $$("#game-type-grid .option-card").forEach(card => {
       const defaultPill = $('#guess-rounds-group .pill[data-rounds="10"]');
       if (defaultPill) defaultPill.classList.add("selected");
       selectedGuessRounds = 10;
-      showScreen("screen-guess-setup");
+      $("#guess-config").hidden = false;
+      $("#auction-config").hidden = true;
+      $("#guess-config").scrollIntoView({ behavior: "smooth", block: "start" });
     }
   });
 });
-$("#btn-home-back").addEventListener("click", () => showScreen("screen-choose-game"));
+$("#btn-auction-collapse").addEventListener("click", collapseGameConfig);
+$("#btn-guess-collapse").addEventListener("click", collapseGameConfig);
 
 /* ===================== GUESS-THE-PRICE GAME ===================== */
 let guessState = null;
@@ -1223,8 +1333,6 @@ $$("#guess-rounds-group .pill").forEach(pill => {
     pill.classList.add("selected");
   });
 });
-
-$("#btn-guess-setup-back").addEventListener("click", () => showScreen("screen-choose-game"));
 
 $("#btn-guess-start").addEventListener("click", () => {
   const name = $("#guess-input-name").value.trim();
@@ -1257,6 +1365,7 @@ function renderGuessRound(){
 
   $("#guess-player-name").textContent = player.name;
   $("#guess-player-club").textContent = player.club || "";
+  $("#guess-player-legend-badge").hidden = !player.legend;
   const badge = $("#guess-player-pos-badge");
   badge.textContent = player.pos;
   badge.className = "badge pos-" + player.pos;
@@ -1320,6 +1429,7 @@ function finishGuessGame(){
 $("#btn-guess-replay").addEventListener("click", () => {
   guessState = null;
   showScreen("screen-choose-game");
+  collapseGameConfig();
 });
 
 $("#btn-guess-home").addEventListener("click", () => {
@@ -1327,8 +1437,10 @@ $("#btn-guess-home").addEventListener("click", () => {
   if (inGame && !confirm("هتخرج من التحدي الحالي وتفقد تقدمك — متأكد؟")) return;
   guessState = null;
   showScreen("screen-choose-game");
+  collapseGameConfig();
 });
 
+renderMissionCard();
 tryResumeSession();
 let hasOnlineSession = false;
 try { hasOnlineSession = !!localStorage.getItem(SESSION_KEY); } catch (e) {}
