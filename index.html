@@ -57,31 +57,26 @@
         <p class="muted">لعبتين مختلفتين لعشاق الكورة — اختار نوع اللعبة، وهتلاقي طريقة اللعب تحتها.</p>
       </div>
 
-      <div class="option-grid" id="game-type-grid">
-        <button class="option-card option-card-wide" data-game="auction" data-squad="11">
-          <span class="opt-icon">⚽</span>
-          <span class="opt-title">مزاد النجوم</span>
-          <span class="opt-desc">مزاد على 11 لاعبًا — كوّن تشكيلتك ضد خصمك</span>
+      <div class="cover-grid" id="game-type-grid">
+        <button class="cover-card" data-game="auction" data-squad="5">
+          <div class="cover-art cover-art-fire"><span class="cover-icon">🔥</span></div>
+          <span class="cover-title">مزاد الخماسي</span>
         </button>
-        <button class="option-card option-card-wide" data-game="auction" data-squad="5">
-          <span class="opt-icon">🔥</span>
-          <span class="opt-title">مزاد الخماسي</span>
-          <span class="opt-desc">مزاد سريع على 5 لاعبين (حارس، مدافع، 2 وسط، مهاجم)</span>
+        <button class="cover-card" data-game="auction" data-squad="11">
+          <div class="cover-art cover-art-gold"><span class="cover-icon">🏆</span></div>
+          <span class="cover-title">مزاد النجوم</span>
         </button>
-        <button class="option-card option-card-wide" data-game="guess">
-          <span class="opt-icon">💰</span>
-          <span class="opt-title">راجع سعرك</span>
-          <span class="opt-desc">خمّن سعر انتقال اللاعب الحقيقي واكسب نقط على دقتك</span>
+        <button class="cover-card" data-game="boxes" data-squad="11">
+          <div class="cover-art cover-art-gift"><span class="cover-icon">🎁</span></div>
+          <span class="cover-title">صناديق الحظ</span>
         </button>
-        <button class="option-card option-card-wide coming-soon" disabled>
-          <span class="opt-icon">🎁</span>
-          <span class="opt-title">صناديق الحظ <span class="soon-badge">قريبًا</span></span>
-          <span class="opt-desc">اختر لاعبك من 4 صناديق مغلقة لكل مركز</span>
+        <button class="cover-card" data-game="guess">
+          <div class="cover-art cover-art-money"><span class="cover-icon">💰</span></div>
+          <span class="cover-title">راجع سعرك</span>
         </button>
-        <button class="option-card option-card-wide coming-soon" disabled>
-          <span class="opt-icon">🕶️</span>
-          <span class="opt-title">المزاد الأعمى <span class="soon-badge">قريبًا</span></span>
-          <span class="opt-desc">ميزانية سرية — كل واحد يكتب عرضه في السر</span>
+        <button class="cover-card cover-card-wide coming-soon" disabled>
+          <div class="cover-art cover-art-blind"><span class="cover-icon">🕶️</span></div>
+          <span class="cover-title">المزاد الأعمى <span class="soon-badge">قريبًا</span></span>
         </button>
       </div>
 
@@ -232,7 +227,10 @@
       <div class="card" id="online-host-card" hidden>
         <span class="eyebrow">رمز غرفتك — شاركه مع صاحبك</span>
         <div class="room-code" id="room-code-display">—</div>
-        <button class="btn btn-ghost btn-block" id="btn-copy-code">📋 نسخ الرمز</button>
+        <div class="code-actions-row">
+          <button class="btn btn-ghost" id="btn-copy-code">📋 نسخ الرمز</button>
+          <button class="btn btn-ghost" id="btn-share-code">📤 مشاركة الرمز</button>
+        </div>
         <p class="waiting-line" id="host-wait-line">⏳ بانتظار الطرف التاني ينضم…</p>
       </div>
 
@@ -337,7 +335,6 @@
         <p class="player-club" id="player-club">—</p>
         <div class="player-meta">
           <span class="badge" id="player-pos-badge">—</span>
-          <span class="base-price">السعر الأساسي: <strong id="player-base">0</strong> م</span>
         </div>
         <div class="player-stats">
           <span class="stat-chip">⚡ الطاقة: <strong id="player-rating">0</strong></span>
@@ -364,6 +361,10 @@
           <button class="btn btn-bid" data-amt="5">➕ خمسة</button>
           <button class="btn btn-bid" data-amt="10">➕ عشرة</button>
         </div>
+        <div class="custom-bid-row">
+          <input type="number" id="custom-bid-input" min="0" placeholder="اكتب رقم العرض" inputmode="numeric">
+          <button class="btn btn-bid" id="btn-custom-bid">ضع العرض</button>
+        </div>
         <button class="btn btn-surrender" id="btn-surrender" disabled>🏳️ تسليم للخصم</button>
       </div>
 
@@ -381,6 +382,52 @@
             <span class="squad-budget"><span id="squad2-budget">500</span> م متبقي</span>
           </div>
           <div class="squad-slots" id="squad2-slots"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== LUCKY BOXES: GAME ===================== -->
+    <section class="screen" id="screen-boxes-game">
+      <div class="game-topbar">
+        <button class="icon-btn" id="btn-boxes-home" title="رجوع للرئيسية">🏠</button>
+        <div class="round-chip">الجولة <span id="boxes-round-num">1</span> / <span id="boxes-round-total">11</span></div>
+        <div class="pos-chip" id="boxes-pos-chip">GK</div>
+      </div>
+
+      <div class="card spotlight-card">
+        <span class="eyebrow" id="boxes-turn-label">دور: —</span>
+        <h2 class="player-name" id="boxes-instruction">🎁 اختر صندوقًا</h2>
+
+        <div class="boxes-grid" id="boxes-grid">
+          <button class="box-card" data-idx="0"><span class="box-icon">🎁</span></button>
+          <button class="box-card" data-idx="1"><span class="box-icon">🎁</span></button>
+          <button class="box-card" data-idx="2"><span class="box-icon">🎁</span></button>
+          <button class="box-card" data-idx="3"><span class="box-icon">🎁</span></button>
+        </div>
+
+        <div class="guess-reveal" id="boxes-reveal" hidden>
+          <div class="player-jersey" id="boxes-reveal-jersey">⚽</div>
+          <h2 class="player-name" id="boxes-reveal-name">—</h2>
+          <p class="player-club" id="boxes-reveal-club">—</p>
+          <div class="player-meta">
+            <span class="badge" id="boxes-reveal-badge">—</span>
+            <span class="stat-chip">⚡ الطاقة: <strong id="boxes-reveal-rating">0</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="squads-wrap">
+        <div class="squad-panel" id="boxes-squad-panel-1">
+          <div class="squad-head">
+            <span class="squad-name" id="boxes-squad1-name">فريق 1</span>
+          </div>
+          <div class="squad-slots" id="boxes-squad1-slots"></div>
+        </div>
+        <div class="squad-panel" id="boxes-squad-panel-2">
+          <div class="squad-head">
+            <span class="squad-name" id="boxes-squad2-name">فريق 2</span>
+          </div>
+          <div class="squad-slots" id="boxes-squad2-slots"></div>
         </div>
       </div>
     </section>
@@ -450,7 +497,7 @@
   <div class="card links-card">
     <h3 class="section-title">🔗 روابط مهمة</h3>
     <div class="links-list">
-      <a class="link-row" href="https://chat.whatsapp.com/HUIqvpRcXITD0RVXBSMWYR?s=cl&p=a&ilr=4" target="_blank" rel="noopener">
+      <a class="link-row" href="https://chat.whatsapp.com/EpoiTNnKary0mitF5j3Zlh?s=cl&p=a&ilr=4" target="_blank" rel="noopener">
         <span class="link-icon">💬</span>
         <span class="link-text">جروب واتساب الرسمي</span>
         <span class="link-arrow">‹</span>
