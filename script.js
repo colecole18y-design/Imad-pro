@@ -619,6 +619,11 @@ function newState(){
     boxesOptions1: null,       // array of up to 4 player objects for player 1's current round
     boxesOptions2: null,       // array of up to 4 player objects for player 2's current round
     boxesStep: "p1",           // 'p1' | 'p2' — whose pick within the round
+    // Blind Auction (gameType === 'blind') fields
+    blindBid1: null,           // player 1's sealed bid this round (null = not submitted yet)
+    blindBid2: null,           // player 2's sealed bid this round
+    blindStep: "p1",           // local mode only: 'p1' | 'handoff' | 'p2' — whose turn to type
+    blindWinner: null,         // set once both bids are in and the round resolves
   };
 }
 
@@ -714,16 +719,28 @@ function generateRoomCode(){
   return code;
 }
 
+function withTimeout(promise, ms, timeoutMsg){
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(timeoutMsg)), ms)),
+  ]);
+}
+
 $("#btn-create-room").addEventListener("click", () => {
   if (!db) return;
   const code = generateRoomCode();
   const ref = db.ref("rooms/" + code);
-  ref.set({
-    host: { name: myOnlineName },
-    guest: null,
-    status: "waiting",
-    createdAt: Date.now(),
-  }).then(() => {
+  $("#online-error").hidden = true;
+  withTimeout(
+    ref.set({
+      host: { name: myOnlineName },
+      guest: null,
+      status: "waiting",
+      createdAt: Date.now(),
+    }),
+    8000,
+    "الاتصال بطيء جدًا أو متوقف"
+  ).then(() => {
     onlineRole = "host";
     roomCode = code;
     roomRef = ref;
@@ -732,7 +749,11 @@ $("#btn-create-room").addEventListener("click", () => {
     $("#online-host-card").hidden = false;
     $("#room-code-display").textContent = code;
     listenForGuestJoin();
-  }).catch(() => showOnlineError("تعذّر إنشاء الغرفة، حاول تاني"));
+  }).catch((err) => {
+    console.error("Room create failed:", err);
+    const detail = (err && err.message) ? err.message : "خطأ غير معروف";
+    showOnlineError("تعذّر إنشاء الغرفة: " + detail);
+  });
 });
 
 $("#btn-copy-code").addEventListener("click", () => {
@@ -771,11 +792,11 @@ function joinRoomByCode(code){
   if (!code){ showOnlineError("اكتب رمز الغرفة أولاً"); return; }
   $("#online-error").hidden = true;
   const ref = db.ref("rooms/" + code);
-  ref.once("value").then(snap => {
+  withTimeout(ref.once("value"), 8000, "الاتصال بطيء جدًا أو متوقف").then(snap => {
     if (!snap.exists()){ showOnlineError("مفيش غرفة بالرمز ده"); return; }
     const room = snap.val();
     if (room.guest){ showOnlineError("الغرفة دي مكتملة بالفعل"); return; }
-    return ref.child("guest").set({ name: myOnlineName }).then(() => {
+    return withTimeout(ref.child("guest").set({ name: myOnlineName }), 8000, "الاتصال بطيء جدًا أو متوقف").then(() => {
       onlineRole = "guest";
       roomCode = code;
       roomRef = ref;
@@ -784,7 +805,11 @@ function joinRoomByCode(code){
       $("#online-guest-card").hidden = false;
       listenAsGuest();
     });
-  }).catch(() => showOnlineError("حصل خطأ، تأكد من الرمز وحاول تاني"));
+  }).catch((err) => {
+    console.error("Room join failed:", err);
+    const detail = (err && err.message) ? err.message : "تأكد من الرمز وحاول تاني";
+    showOnlineError("تعذّر الدخول: " + detail);
+  });
 }
 
 $("#btn-join-room").addEventListener("click", () => {
@@ -944,6 +969,15 @@ function listenForActions(){
     if (action.type === "bid") placeBid(Number(action.amount) || 1);
     else if (action.type === "surrender") doSurrender();
     else if (action.type === "box") pickBox(Number(action.amount) || 0);
+    else if (action.type === "blindbid"){
+      if (state.gameType === "blind" && state.blindBid2 === null){
+        state.blindBid2 = Number(action.amount) || 0;
+        renderBlindRound();
+        syncOnlineState();
+        saveLocalProgress();
+        if (state.blindBid1 !== null && state.blindBid2 !== null) resolveBlindRound();
+      }
+    }
   });
 }
 
@@ -1047,10 +1081,12 @@ $("#btn-start-auction").addEventListener("click", () => {
     listenForActions();
     roomRef.update({
       status: "playing",
-      settings: { difficulty: state.difficulty, timerSetting: state.timerSetting, budget: state.budget },
+      settings: { difficulty: state.difficulty, timerSetting: state.timerSetting, budget: state.budget, gameType: state.gameType },
     });
   }
-  startAuction();
+
+  if (state.gameType === "blind") startBlindAuction();
+  else startAuction();
 });
 
 /* ===================== AUCTION ENGINE (runs on: local player in ai/local modes, HOST only in online mode) ===================== */
@@ -1363,6 +1399,236 @@ $$("#boxes-grid .box-card").forEach(btn => {
 $("#btn-boxes-home").addEventListener("click", () => {
   const inGame = state && state.round > 0 && state.status !== "finished";
   if (inGame && !confirm("هتخرج من صناديق الحظ الحالية وتفقد كل التقدم — متأكد؟")) return;
+  resetToHome();
+});
+
+/* ===================== BLIND AUCTION ENGINE ===================== */
+function startBlindAuction(){
+  if (!state) return;
+  state.round = 0;
+  state.squad1 = []; state.squad2 = [];
+  showScreen("screen-blind-game");
+  renderBlindSquads();
+  nextBlindRound();
+}
+
+function nextBlindRound(){
+  if (!state) return;
+  state.round++;
+  if (state.round > currentPositions().length){ finishAuction(); return; }
+  const position = currentPositions()[state.round - 1];
+  const featured = pickPlayer(position, state.difficulty);
+  if (!featured){ nextBlindRound(); return; }
+  state.currentPlayer = featured;
+  state.consolationPlayer = pickConsolation(position);
+  state.blindBid1 = null;
+  state.blindBid2 = null;
+  state.blindWinner = null;
+  state.blindStep = "p1";
+  renderBlindRound();
+  syncOnlineState();
+  saveLocalProgress();
+}
+
+function renderBlindSquads(){
+  $("#blind-squad1-name").textContent = state.p1Name;
+  $("#blind-squad2-name").textContent = state.p2Name;
+  $("#blind-squad1-budget").textContent = state.budget1;
+  $("#blind-squad2-budget").textContent = state.budget2;
+  $("#blind-squad1-slots").innerHTML = slotTemplate(state.squad1, currentPositions().length);
+  $("#blind-squad2-slots").innerHTML = slotTemplate(state.squad2, currentPositions().length);
+}
+
+function renderBlindRound(){
+  if (!state || !state.currentPlayer) return;
+  const player = state.currentPlayer;
+  const position = player.pos;
+
+  $("#blind-round-num").textContent = state.round;
+  $("#blind-round-total").textContent = currentPositions().length;
+  $("#blind-pos-chip").textContent = POS_ICON[position] + " " + POS_LABEL[position];
+
+  const jersey = $("#blind-player-jersey");
+  jersey.textContent = getInitials(player.name);
+  jersey.style.background = colorForName(player.name);
+  $("#blind-player-name").textContent = player.name;
+  $("#blind-player-club").textContent = player.club || "";
+  const badge = $("#blind-player-pos-badge");
+  badge.textContent = position; badge.className = "badge pos-" + position;
+  $("#blind-player-rating").textContent = player.rating || "—";
+
+  $("#blind-input-wrap").hidden = true;
+  $("#blind-handoff").hidden = true;
+  $("#blind-waiting").hidden = true;
+  $("#blind-reveal").hidden = true;
+  $("#blind-warn-line").hidden = true;
+  $("#blind-bid-input").value = "";
+
+  renderBlindSquads();
+
+  if (state.blindBid1 !== null && state.blindBid2 !== null){
+    showBlindReveal();
+    return;
+  }
+
+  if (state.mode === "local"){
+    if (state.blindStep === "p1"){
+      $("#blind-turn-label").textContent = "دور: " + state.p1Name;
+      $("#blind-input-wrap").hidden = false;
+    } else if (state.blindStep === "handoff"){
+      $("#blind-handoff-name").textContent = state.p1Name;
+      $("#blind-handoff").hidden = false;
+    } else if (state.blindStep === "p2"){
+      $("#blind-turn-label").textContent = "دور: " + state.p2Name;
+      $("#blind-input-wrap").hidden = false;
+    }
+  } else if (state.mode === "ai"){
+    if (state.blindBid1 === null){
+      $("#blind-turn-label").textContent = "دورك";
+      $("#blind-input-wrap").hidden = false;
+    } else {
+      $("#blind-waiting-text").textContent = "🤖 الحاسوب بيفكر في عرضه…";
+      $("#blind-waiting").hidden = false;
+    }
+  } else if (state.mode === "online"){
+    const myNum = onlineRole === "host" ? 1 : 2;
+    const myBid = myNum === 1 ? state.blindBid1 : state.blindBid2;
+    if (myBid === null){
+      $("#blind-turn-label").textContent = "دورك";
+      $("#blind-input-wrap").hidden = false;
+    } else {
+      $("#blind-waiting-text").textContent = "⏳ في انتظار الطرف التاني يقفل عرضه…";
+      $("#blind-waiting").hidden = false;
+    }
+  }
+}
+
+function showBlindWarning(msg){
+  const w = $("#blind-warn-line");
+  w.textContent = msg;
+  w.hidden = false;
+}
+
+function submitBlindBid(){
+  if (!state || !state.currentPlayer) return;
+  const amount = Math.max(0, Math.floor(Number($("#blind-bid-input").value) || 0));
+
+  if (state.mode === "local"){
+    if (state.blindStep === "p1"){
+      if (amount > state.budget1){ showBlindWarning("الميزانية مش كفاية"); return; }
+      state.blindBid1 = amount;
+      state.blindStep = "handoff";
+    } else if (state.blindStep === "p2"){
+      if (amount > state.budget2){ showBlindWarning("الميزانية مش كفاية"); return; }
+      state.blindBid2 = amount;
+    }
+    saveLocalProgress();
+    if (state.blindBid1 !== null && state.blindBid2 !== null) resolveBlindRound();
+    else renderBlindRound();
+    return;
+  }
+
+  if (state.mode === "ai"){
+    if (amount > state.budget1){ showBlindWarning("الميزانية مش كفاية"); return; }
+    state.blindBid1 = amount;
+    renderBlindRound();
+    saveLocalProgress();
+    maybeTriggerComputerBlindBid();
+    return;
+  }
+
+  if (state.mode === "online"){
+    const myNum = onlineRole === "host" ? 1 : 2;
+    const myBudget = myNum === 1 ? state.budget1 : state.budget2;
+    if (amount > myBudget){ showBlindWarning("الميزانية مش كفاية"); return; }
+    if (onlineRole === "host"){
+      state.blindBid1 = amount;
+      renderBlindRound();
+      syncOnlineState();
+      saveLocalProgress();
+      if (state.blindBid1 !== null && state.blindBid2 !== null) resolveBlindRound();
+    } else {
+      sendOnlineAction("blindbid", amount);
+      $("#blind-input-wrap").hidden = true;
+      $("#blind-waiting-text").textContent = "⏳ في انتظار الطرف التاني يقفل عرضه…";
+      $("#blind-waiting").hidden = false;
+    }
+  }
+}
+
+$("#btn-blind-submit").addEventListener("click", submitBlindBid);
+$("#blind-bid-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") submitBlindBid();
+});
+
+$("#btn-blind-handoff-continue").addEventListener("click", () => {
+  if (!state) return;
+  state.blindStep = "p2";
+  renderBlindRound();
+  saveLocalProgress();
+});
+
+function maybeTriggerComputerBlindBid(){
+  if (!state || state.mode !== "ai") return;
+  setTimeout(() => {
+    if (!state || state.mode !== "ai" || !state.currentPlayer || state.blindBid2 !== null) return;
+    const base = state.currentPlayer.price || 10;
+    const willingness = Math.round(base * (0.6 + Math.random() * 1.2));
+    const remainingSlots = currentPositions().length - state.round + 1;
+    const reserve = Math.max(0, (remainingSlots - 1) * 4);
+    const affordable = Math.max(0, state.budget2 - reserve);
+    const amount = Math.max(0, Math.min(willingness, affordable, state.budget2));
+    state.blindBid2 = amount;
+    resolveBlindRound();
+  }, 900 + Math.random() * 900);
+}
+
+function resolveBlindRound(){
+  if (!state || state.blindBid1 === null || state.blindBid2 === null) return;
+  const winner = state.blindBid1 === state.blindBid2
+    ? (Math.random() < 0.5 ? 1 : 2)
+    : (state.blindBid1 > state.blindBid2 ? 1 : 2);
+  const loser = opponentOf(winner);
+  const price = winner === 1 ? state.blindBid1 : state.blindBid2;
+  const player = state.currentPlayer;
+
+  if (winner === 1){ state.budget1 -= price; state.squad1.push(player); }
+  else { state.budget2 -= price; state.squad2.push(player); }
+
+  const consolation = state.consolationPlayer;
+  if (consolation){
+    const withRating = Object.assign({}, consolation, { price: 0, awarded: true });
+    if (loser === 1) state.squad1.push(withRating); else state.squad2.push(withRating);
+  }
+
+  state.blindWinner = winner;
+  showBlindReveal();
+  syncOnlineState();
+  saveLocalProgress();
+  setTimeout(nextBlindRound, 1800);
+}
+
+function showBlindReveal(){
+  $("#blind-input-wrap").hidden = true;
+  $("#blind-handoff").hidden = true;
+  $("#blind-waiting").hidden = true;
+  $("#blind-reveal").hidden = false;
+  $("#blind-reveal-name1").textContent = state.p1Name;
+  $("#blind-reveal-name2").textContent = state.p2Name;
+  $("#blind-reveal-amt1").textContent = state.blindBid1;
+  $("#blind-reveal-amt2").textContent = state.blindBid2;
+  renderBlindSquads();
+
+  let winnerText;
+  if (state.blindWinner === 1) winnerText = "🏆 " + state.p1Name + " كسب اللاعب!";
+  else if (state.blindWinner === 2) winnerText = "🏆 " + state.p2Name + " كسب اللاعب!";
+  else winnerText = "—";
+  $("#blind-reveal-winner").textContent = winnerText;
+}
+
+$("#btn-blind-home").addEventListener("click", () => {
+  const inGame = state && state.round > 0 && state.status !== "finished";
+  if (inGame && !confirm("هتخرج من المزاد الأعمى الحالي وتفقد كل التقدم — متأكد؟")) return;
   resetToHome();
 });
 
@@ -1819,7 +2085,7 @@ $("#tab-lb-guess").addEventListener("click", () => loadLeaderboard("guess"));
 
 /* ===================== GAME TYPE SELECTION ===================== */
 let selectedSquadSize = 11;
-let selectedGameType = "auction"; // 'auction' | 'boxes'
+let selectedGameType = "auction"; // 'auction' | 'boxes' | 'blind'
 
 $$("#game-type-grid .cover-card").forEach(card => {
   card.addEventListener("click", () => {
@@ -1827,11 +2093,12 @@ $$("#game-type-grid .cover-card").forEach(card => {
     $$("#game-type-grid .cover-card").forEach(c => c.classList.remove("selected"));
     card.classList.add("selected");
 
-    if (game === "auction" || game === "boxes"){
+    if (game === "auction" || game === "boxes" || game === "blind"){
       selectedGameType = game;
       selectedSquadSize = Number(card.dataset.squad) === 5 ? 5 : 11;
       const fmtLabel = SQUAD_FORMATS[selectedSquadSize].label;
-      $("#auction-config-label").textContent = game === "boxes" ? ("🎁 صناديق الحظ — " + fmtLabel) : fmtLabel;
+      const gameLabel = game === "boxes" ? "🎁 صناديق الحظ — " : game === "blind" ? "🕶️ المزاد الأعمى — " : "";
+      $("#auction-config-label").textContent = gameLabel + fmtLabel;
       $("#auction-config").hidden = false;
       $("#guess-config").hidden = true;
       $("#auction-config").scrollIntoView({ behavior: "smooth", block: "start" });
