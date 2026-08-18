@@ -156,6 +156,27 @@ button{ font-family:'Tajawal', sans-serif; }
   padding:2px 7px; margin-inline-start:6px; vertical-align:middle;
 }
 
+/* ---------- Game type cover cards ---------- */
+.cover-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+.cover-card{
+  display:flex; flex-direction:column; border-radius:16px; overflow:hidden; padding:0;
+  border:1px solid var(--panel-border); background: var(--panel); cursor:pointer; text-align:center;
+  transition: 0.15s ease;
+}
+.cover-card:hover, .cover-card:focus-visible{ border-color: var(--gold); transform: translateY(-2px); outline:none; }
+.cover-card.selected{ border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
+.cover-card-wide{ grid-column: 1 / -1; }
+.cover-art{ height:88px; display:flex; align-items:center; justify-content:center; }
+.cover-icon{ font-size:38px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.35)); }
+.cover-title{ padding:10px 8px; font-size:13px; font-weight:800; color: var(--cream); }
+.cover-art-gold{ background: radial-gradient(circle at 30% 22%, #f2d675, #a9790a 85%); }
+.cover-art-fire{ background: radial-gradient(circle at 30% 22%, #ff9a6c, #c1401f 85%); }
+.cover-art-money{ background: radial-gradient(circle at 30% 22%, #8bf0b4, #1f8a5c 85%); }
+.cover-art-gift{ background: radial-gradient(circle at 30% 22%, #e0b3ff, #7b2fbf 85%); }
+.cover-art-blind{ background: radial-gradient(circle at 30% 22%, #7d93ad, #1c2733 85%); }
+.cover-card.coming-soon{ opacity:0.55; cursor:not-allowed; }
+.cover-card.coming-soon:hover{ transform:none; border-color: var(--panel-border); }
+
 .form-card .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:12px; font-size:13px; color: var(--muted); }
 .form-card .field em{ color: var(--gold); font-style:normal; font-size:11px; }
 .form-card input[type="text"]{
@@ -222,6 +243,8 @@ button{ font-family:'Tajawal', sans-serif; }
 
 /* ---------- Online room screen ---------- */
 .or-sep{ text-align:center; color: var(--muted); font-size:12px; margin: 14px 0 10px; }
+.code-actions-row{ display:flex; gap:8px; }
+.code-actions-row .btn{ flex:1; }
 
 .open-rooms-block{ margin-top: 18px; }
 .open-rooms-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
@@ -348,6 +371,25 @@ button{ font-family:'Tajawal', sans-serif; }
 .warn-line{ font-size:12px; color: var(--red); margin: 0 0 8px; }
 
 .bid-controls{ display:grid; grid-template-columns: repeat(3,1fr); gap:8px; margin: 10px 0 10px; }
+
+/* ---------- Lucky boxes ---------- */
+.boxes-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap:12px; margin: 14px 0 6px; }
+.box-card{
+  aspect-ratio: 1; border-radius:16px; cursor:pointer; transition: 0.15s ease;
+  background: linear-gradient(155deg, var(--panel-2), var(--panel));
+  border: 2px solid var(--panel-border);
+  display:flex; align-items:center; justify-content:center;
+}
+.box-card:hover:not(:disabled){ border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 10px 22px rgba(212,175,55,0.18); }
+.box-card:disabled{ opacity:0.4; cursor:not-allowed; }
+.box-icon{ font-size:38px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.35)); }
+.custom-bid-row{ display:flex; gap:8px; margin: 0 0 10px; }
+.custom-bid-row input{
+  flex:1; text-align:center; background: var(--bg-deep); border:1px solid var(--panel-border);
+  border-radius:10px; padding:10px 8px; color: var(--cream); font-size:14px; font-family:'Tajawal',sans-serif;
+}
+.custom-bid-row input:focus{ outline:2px solid var(--gold); border-color: transparent; }
+.custom-bid-row .btn-bid{ flex-shrink:0; padding:10px 14px; font-size:12.5px; }
 .btn-bid{ background: var(--panel); border:1px solid var(--panel-border); color: var(--cream); }
 .btn-bid:hover:not(:disabled){ border-color: var(--gold); color: var(--gold-light); }
 .btn-bid:disabled{ opacity:0.35; cursor:not-allowed; }
