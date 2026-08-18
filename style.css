@@ -1,18 +1,19 @@
-/* ===================== IMAD PRO — Stadium Night Theme ===================== */
+/* ===================== IMAD PRO — Crimson & Gold Night Theme ===================== */
 
 :root{
-  --bg-deep: #071a12;
-  --bg-deep-2: #05130d;
-  --panel: #0e2a1e;
-  --panel-2: #123423;
-  --panel-border: rgba(212,175,55,0.16);
+  --bg-deep: #0d0a10;
+  --bg-deep-2: #060409;
+  --panel: #1b141f;
+  --panel-2: #241a29;
+  --panel-border: rgba(230,57,70,0.20);
   --gold: #d4af37;
-  --gold-light: #f2d675;
-  --cream: #f5efe0;
-  --muted: #9db3a6;
-  --red: #e0503c;
+  --gold-light: #f4d878;
+  --cream: #f6f1e7;
+  --muted: #ab9dac;
+  --red: #e6394a;
+  --red-light: #ff6b7a;
   --blue: #4fa8e0;
-  --green-pos: #46c98a;
+  --green-pos: #43c98a;
   --amber: #e0a83c;
   --win: #3ecf8e;
   --radius: 18px;
@@ -38,16 +39,16 @@ button{ font-family:'Tajawal', sans-serif; }
 .stadium-bg{
   position: fixed; inset: 0; z-index: -1; overflow: hidden;
   background:
-    radial-gradient(120% 90% at 50% -10%, #123c28 0%, var(--bg-deep) 55%, var(--bg-deep-2) 100%);
+    radial-gradient(120% 90% at 50% -10%, #2a1420 0%, var(--bg-deep) 55%, var(--bg-deep-2) 100%);
 }
 .floodlight{
   position:absolute; width: 60vw; height: 60vw; border-radius:50%;
-  background: radial-gradient(circle, rgba(212,175,55,0.22) 0%, rgba(212,175,55,0.06) 40%, transparent 70%);
+  background: radial-gradient(circle, rgba(230,57,74,0.22) 0%, rgba(230,57,74,0.06) 40%, transparent 70%);
   filter: blur(2px);
   animation: sway 12s ease-in-out infinite alternate;
 }
 .fl-1{ top:-20vw; right:-15vw; }
-.fl-2{ bottom:-25vw; left:-20vw; animation-delay: 3s; background: radial-gradient(circle, rgba(70,201,138,0.18) 0%, rgba(70,201,138,0.05) 40%, transparent 70%); }
+.fl-2{ bottom:-25vw; left:-20vw; animation-delay: 3s; background: radial-gradient(circle, rgba(212,175,55,0.20) 0%, rgba(212,175,55,0.06) 40%, transparent 70%); }
 @keyframes sway{
   from{ transform: translateY(0) scale(1); }
   to{ transform: translateY(3vw) scale(1.08); }
@@ -324,6 +325,23 @@ button{ font-family:'Tajawal', sans-serif; }
 .guess-actual strong{ color: var(--gold-light); }
 .guess-score-line{ font-size:15px; font-weight:800; color: var(--win); margin: 0 0 14px; }
 
+/* ---------- Blind auction ---------- */
+.blind-input-wrap{ margin-top:10px; }
+.blind-input-wrap input{
+  width:100%; text-align:center; font-family:'Cairo',sans-serif; font-weight:900; font-size:24px;
+  color: var(--gold-light); background: var(--bg-deep); border:1px solid var(--panel-border);
+  border-radius:12px; padding:12px 8px; margin: 8px 0 12px; -moz-appearance: textfield;
+}
+.blind-input-wrap input::-webkit-outer-spin-button, .blind-input-wrap input::-webkit-inner-spin-button{
+  -webkit-appearance:none; margin:0;
+}
+.blind-handoff, .blind-waiting{ margin-top:12px; }
+.blind-reveal-row{ display:flex; align-items:center; justify-content:center; gap:16px; margin: 12px 0 8px; }
+.blind-reveal-side{ display:flex; flex-direction:column; align-items:center; gap:4px; min-width:84px; }
+.blind-reveal-side .score-name{ font-size:12px; color: var(--muted); }
+.blind-reveal-side .score-num{ font-size:30px; font-weight:900; font-family:'Cairo',sans-serif; color: var(--gold-light); }
+
+
 .spotlight-card{ text-align:center; position:relative; overflow:hidden; }
 .player-jersey{
   font-size:26px; font-weight:900; font-family:'Cairo',sans-serif; color:#fff;
@@ -344,7 +362,7 @@ button{ font-family:'Tajawal', sans-serif; }
 .stat-chip strong{ color: var(--gold-light); }
 .badge{
   font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:8px;
-  background: rgba(70,201,138,0.16); color: var(--green-pos); border:1px solid rgba(70,201,138,0.3);
+  background: rgba(67,201,138,0.16); color: var(--green-pos); border:1px solid rgba(67,201,138,0.3);
 }
 .badge.pos-GK{ background: rgba(224,168,60,0.16); color: var(--amber); border-color: rgba(224,168,60,0.3); }
 .badge.pos-DF{ background: rgba(79,168,224,0.16); color: var(--blue); border-color: rgba(79,168,224,0.3); }
