@@ -74,9 +74,9 @@
           <div class="cover-art cover-art-money"><span class="cover-icon">💰</span></div>
           <span class="cover-title">راجع سعرك</span>
         </button>
-        <button class="cover-card cover-card-wide coming-soon" disabled>
+        <button class="cover-card cover-card-wide" data-game="blind" data-squad="11">
           <div class="cover-art cover-art-blind"><span class="cover-icon">🕶️</span></div>
-          <span class="cover-title">المزاد الأعمى <span class="soon-badge">قريبًا</span></span>
+          <span class="cover-title">المزاد الأعمى</span>
         </button>
       </div>
 
@@ -428,6 +428,76 @@
             <span class="squad-name" id="boxes-squad2-name">فريق 2</span>
           </div>
           <div class="squad-slots" id="boxes-squad2-slots"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== BLIND AUCTION: GAME ===================== -->
+    <section class="screen" id="screen-blind-game">
+      <div class="game-topbar">
+        <button class="icon-btn" id="btn-blind-home" title="رجوع للرئيسية">🏠</button>
+        <div class="round-chip">الجولة <span id="blind-round-num">1</span> / <span id="blind-round-total">11</span></div>
+        <div class="pos-chip" id="blind-pos-chip">GK</div>
+      </div>
+
+      <div class="card spotlight-card">
+        <span class="eyebrow">🕶️ تحت المزاد الأعمى الآن</span>
+        <div class="player-jersey" id="blind-player-jersey">⚽</div>
+        <h2 class="player-name" id="blind-player-name">—</h2>
+        <p class="player-club" id="blind-player-club">—</p>
+        <div class="player-meta">
+          <span class="badge" id="blind-player-pos-badge">—</span>
+          <span class="stat-chip">⚡ الطاقة: <strong id="blind-player-rating">0</strong></span>
+        </div>
+
+        <div class="blind-input-wrap" id="blind-input-wrap" hidden>
+          <p class="turn-line" id="blind-turn-label">دور: —</p>
+          <span class="bid-label">عرضك السري (مليون)</span>
+          <input type="number" id="blind-bid-input" min="0" placeholder="اكتب رقمك" inputmode="numeric">
+          <p class="warn-line" id="blind-warn-line" hidden></p>
+          <button class="btn btn-gold btn-block" id="btn-blind-submit">🔒 قفل العرض</button>
+        </div>
+
+        <div class="blind-handoff" id="blind-handoff" hidden>
+          <p class="waiting-line">✅ اتقفل عرض <span id="blind-handoff-name">—</span></p>
+          <p class="muted">مرّر الجهاز للاعب التاني، وما تبصّش يا اللي عرضت 👀</p>
+          <button class="btn btn-gold btn-block" id="btn-blind-handoff-continue">تمام، جاهز</button>
+        </div>
+
+        <div class="blind-waiting" id="blind-waiting" hidden>
+          <p class="waiting-line" id="blind-waiting-text">⏳ في انتظار الطرف التاني…</p>
+        </div>
+
+        <div class="guess-reveal" id="blind-reveal" hidden>
+          <div class="blind-reveal-row">
+            <div class="blind-reveal-side">
+              <span class="score-name" id="blind-reveal-name1">—</span>
+              <span class="score-num" id="blind-reveal-amt1">0</span>
+            </div>
+            <span class="score-sep">—</span>
+            <div class="blind-reveal-side">
+              <span class="score-num" id="blind-reveal-amt2">0</span>
+              <span class="score-name" id="blind-reveal-name2">—</span>
+            </div>
+          </div>
+          <p class="guess-score-line" id="blind-reveal-winner">—</p>
+        </div>
+      </div>
+
+      <div class="squads-wrap">
+        <div class="squad-panel" id="blind-squad-panel-1">
+          <div class="squad-head">
+            <span class="squad-name" id="blind-squad1-name">فريق 1</span>
+            <span class="squad-budget"><span id="blind-squad1-budget">500</span> م متبقي</span>
+          </div>
+          <div class="squad-slots" id="blind-squad1-slots"></div>
+        </div>
+        <div class="squad-panel" id="blind-squad-panel-2">
+          <div class="squad-head">
+            <span class="squad-name" id="blind-squad2-name">فريق 2</span>
+            <span class="squad-budget"><span id="blind-squad2-budget">500</span> م متبقي</span>
+          </div>
+          <div class="squad-slots" id="blind-squad2-slots"></div>
         </div>
       </div>
     </section>
