@@ -42,7 +42,7 @@ const PLAYERS = [
   {name:"مانويل نوير", pos:"GK", price:15, rating:82, tier:3, club:"بايرن ميونخ"},
   {name:"ميكي إينيانا", pos:"GK", price:10, rating:78, tier:3, club:"برشلونة"},
   {name:"إيكر كاسياس", pos:"GK", price:50, rating:88, tier:1, club:"ريال مدريد (معتزل)"},
-  {name:"جانلويجي بوفون", pos:"GK", price:45, rating:87, tier:1, club:"يوفنتوس (معتزل)"},
+  {name:"جانلويجي بوفون", pos:"GK", price:45, rating:90, tier:1, club:"يوفنتوس (معتزل)"},
   {name:"ديفيد رايا", pos:"GK", price:35, rating:85, tier:2, club:"أرسنال"},
   {name:"ديوغو كوستا", pos:"GK", price:38, rating:85, tier:2, club:"بورتو"},
   {name:"مايك ماينيان", pos:"GK", price:36, rating:85, tier:2, club:"ميلان"},
@@ -86,7 +86,7 @@ const PLAYERS = [
   {name:"دان بوردي", pos:"DF", price:12, rating:76, tier:3, club:"برايتون"},
   {name:"يوشكو غيندوزي", pos:"DF", price:9, rating:74, tier:3, club:"لاتسيو"},
   {name:"باولو مالديني", pos:"DF", price:55, rating:89, tier:1, club:"ميلان (معتزل)"},
-  {name:"روبرتو كارلوس", pos:"DF", price:48, rating:87, tier:1, club:"ريال مدريد (معتزل)"},
+  {name:"روبرتو كارلوس", pos:"DF", price:48, rating:88, tier:1, club:"ريال مدريد (معتزل)"},
   {name:"إدير ميليتاو", pos:"DF", price:44, rating:86, tier:2, club:"ريال مدريد"},
   {name:"ماركينيوس", pos:"DF", price:46, rating:86, tier:2, club:"باريس سان جيرمان"},
   {name:"كيم مين جاي", pos:"DF", price:40, rating:85, tier:2, club:"بايرن ميونخ"},
@@ -123,7 +123,7 @@ const PLAYERS = [
   {name:"خافيير زانيتي", pos:"DF", price:26, rating:84, tier:2, club:"إنتر ميلان (معتزل)"},
   {name:"باتريس إيفرا", pos:"DF", price:20, rating:82, tier:3, club:"مانشستر يونايتد (معتزل)"},
   {name:"جاري نيفيل", pos:"DF", price:16, rating:80, tier:3, club:"مانشستر يونايتد (معتزل)"},
-  {name:"كافو", pos:"DF", price:26, rating:84, tier:2, club:"البرازيل (معتزل)"},
+  {name:"كافو", pos:"DF", price:26, rating:87, tier:2, club:"البرازيل (معتزل)"},
   {name:"جورجيو كيليني", pos:"DF", price:24, rating:84, tier:2, club:"يوفنتوس (معتزل)"},
   {name:"ليوناردو بونوتشي", pos:"DF", price:16, rating:81, tier:3, club:"إيطاليا (معتزل)"},
   {name:"تياغو سيلفا", pos:"DF", price:14, rating:80, tier:3, club:"فلومينينسي"},
@@ -153,7 +153,7 @@ const PLAYERS = [
   {name:"أليكسيس ماك أليستر", pos:"MF", price:38, rating:84, tier:2, club:"ليفربول"},
   {name:"زين الدين زيدان", pos:"MF", price:90, rating:93, tier:1, club:"ريال مدريد (معتزل)"},
   {name:"أندريا بيرلو", pos:"MF", price:60, rating:89, tier:1, club:"يوفنتوس (معتزل)"},
-  {name:"ستيفن جيرارد", pos:"MF", price:58, rating:88, tier:1, club:"ليفربول (معتزل)"},
+  {name:"ستيفن جيرارد", pos:"MF", price:58, rating:89, tier:1, club:"ليفربول (معتزل)"},
   {name:"توني كروس", pos:"MF", price:50, rating:88, tier:2, club:"ريال مدريد (معتزل)"},
   {name:"لوكا مودريتش", pos:"MF", price:44, rating:87, tier:2, club:"ميلان"},
   {name:"كاسيميرو", pos:"MF", price:24, rating:82, tier:3, club:"مانشستر يونايتد"},
@@ -180,11 +180,11 @@ const PLAYERS = [
   {name:"ياya توريه", pos:"MF", price:14, rating:80, tier:3, club:"مانشستر سيتي (معتزل)"},
   {name:"كلود ماكيليلي", pos:"MF", price:12, rating:79, tier:3, club:"تشيلسي (معتزل)"},
   {name:"ديكو", pos:"MF", price:16, rating:81, tier:3, club:"برشلونة (معتزل)"},
-  {name:"كاكا", pos:"MF", price:36, rating:86, tier:2, club:"ميلان (معتزل)"},
-  {name:"لويس فيغو", pos:"MF", price:32, rating:85, tier:2, club:"ريال مدريد (معتزل)"},
-  {name:"ديفيد بيكهام", pos:"MF", price:28, rating:84, tier:2, club:"مانشستر يونايتد (معتزل)"},
+  {name:"كاكا", pos:"MF", price:36, rating:90, tier:2, club:"ميلان (معتزل)"},
+  {name:"لويس فيغو", pos:"MF", price:32, rating:88, tier:2, club:"ريال مدريد (معتزل)"},
+  {name:"ديفيد بيكهام", pos:"MF", price:28, rating:87, tier:2, club:"مانشستر يونايتد (معتزل)"},
   {name:"فرانك لامبارد", pos:"MF", price:26, rating:84, tier:2, club:"تشيلسي (معتزل)"},
-  {name:"يوهان كرويف", pos:"MF", price:38, rating:87, tier:1, club:"أياكس (معتزل)"},
+  {name:"يوهان كرويف", pos:"MF", price:38, rating:92, tier:1, club:"أياكس (معتزل)"},
   {name:"جينارو غاتوزو", pos:"MF", price:12, rating:79, tier:3, club:"ميلان (معتزل)"},
   {name:"إدغار ديفيدز", pos:"MF", price:12, rating:79, tier:3, club:"هولندا (معتزل)"},
   {name:"كلارنس سيدورف", pos:"MF", price:18, rating:81, tier:3, club:"ميلان (معتزل)"},
@@ -211,8 +211,8 @@ const PLAYERS = [
   {name:"رسمين دورتوند", pos:"FW", price:16, rating:79, tier:3, club:"موناكو"},
   {name:"إليي وحيد", pos:"FW", price:10, rating:76, tier:3, club:"وست هام"},
   {name:"كيندري بايس", pos:"FW", price:8, rating:74, tier:3, club:"لايبزيغ"},
-  {name:"رونالدو نازاريو", pos:"FW", price:100, rating:92, tier:1, club:"ريال مدريد (معتزل)"},
-  {name:"رونالدينيو", pos:"FW", price:95, rating:91, tier:1, club:"برشلونة (معتزل)"},
+  {name:"رونالدو نازاريو", pos:"FW", price:100, rating:96, tier:1, club:"ريال مدريد (معتزل)"},
+  {name:"رونالدينيو", pos:"FW", price:95, rating:94, tier:1, club:"برشلونة (معتزل)"},
   {name:"دييغو مارادونا", pos:"FW", price:130, rating:95, tier:1, club:"نابولي (معتزل)"},
   {name:"بيليه", pos:"FW", price:130, rating:96, tier:1, club:"سانتوس (معتزل)"},
   {name:"روبرت ليفاندوفسكي", pos:"FW", price:70, rating:89, tier:2, club:"برشلونة"},
@@ -242,7 +242,7 @@ const PLAYERS = [
   {name:"كودي غاكبو", pos:"FW", price:30, rating:83, tier:2, club:"ليفربول"},
   {name:"ويسام بن يدر", pos:"FW", price:9, rating:75, tier:3, club:"موناكو"},
   {name:"مويز كين", pos:"FW", price:12, rating:78, tier:3, club:"فيورنتينا"},
-  {name:"تيري هنري", pos:"FW", price:60, rating:89, tier:1, club:"أرسنال (معتزل)"},
+  {name:"تيري هنري", pos:"FW", price:60, rating:92, tier:1, club:"أرسنال (معتزل)"},
   {name:"ديدييه دروغبا", pos:"FW", price:52, rating:88, tier:1, club:"تشيلسي (معتزل)"},
   {name:"صامويل إيتو", pos:"FW", price:48, rating:87, tier:1, club:"الكاميرون (معتزل)"},
   {name:"روود فان نيستلروي", pos:"FW", price:44, rating:87, tier:1, club:"مانشستر يونايتد (معتزل)"},
@@ -252,8 +252,8 @@ const PLAYERS = [
   {name:"فرناندو توريس", pos:"FW", price:32, rating:85, tier:2, club:"ليفربول (معتزل)"},
   {name:"ديفيد فيا", pos:"FW", price:28, rating:84, tier:2, club:"إسبانيا (معتزل)"},
   {name:"لويس سواريز", pos:"FW", price:20, rating:82, tier:3, club:"إنتر ميامي"},
-  {name:"زلاتان إبراهيموفيتش", pos:"FW", price:34, rating:85, tier:2, club:"ميلان (معتزل)"},
-  {name:"أندريه شيفتشينكو", pos:"FW", price:36, rating:86, tier:2, club:"ميلان (معتزل)"},
+  {name:"زلاتان إبراهيموفيتش", pos:"FW", price:34, rating:89, tier:2, club:"ميلان (معتزل)"},
+  {name:"أندريه شيفتشينكو", pos:"FW", price:36, rating:89, tier:2, club:"ميلان (معتزل)"},
   {name:"راؤول غونزاليس", pos:"FW", price:38, rating:86, tier:2, club:"ريال مدريد (معتزل)"},
   {name:"فيليبو إنزاغي", pos:"FW", price:24, rating:83, tier:2, club:"ميلان (معتزل)"},
   {name:"غابرييل باتيستوتا", pos:"FW", price:32, rating:85, tier:2, club:"الأرجنتين (معتزل)"},
@@ -266,6 +266,98 @@ const PLAYERS = [
   {name:"إيمانويل أديبايور", pos:"FW", price:8, rating:75, tier:3, club:"توغو (معتزل)"},
   {name:"نيمار جونيور", pos:"FW", price:35, rating:84, tier:2, club:"سانتوس"},
   {name:"دينيس بيرغكامب", pos:"FW", price:26, rating:84, tier:2, club:"أرسنال (معتزل)"},
+
+  // ===================== Extra Goalkeepers =====================
+  {name:"لوريس كارريوس", pos:"GK", price:12, rating:78, tier:3, club:"برشلونة"},
+  {name:"أرميل بيلا كوتشاب", pos:"GK", price:10, rating:77, tier:3, club:"سبورتينغ لشبونة"},
+  {name:"جانلوكا بالوتيلي", pos:"GK", price:6, rating:72, tier:3, club:"جنوى"},
+  {name:"أندرياس لونيرغان", pos:"GK", price:9, rating:76, tier:3, club:"وست هام"},
+  {name:"إيمي مارتن", pos:"GK", price:11, rating:77, tier:3, club:"لايبزيغ"},
+  {name:"روبن أولسن", pos:"GK", price:7, rating:74, tier:3, club:"أستون فيلا"},
+  {name:"بيار غاسيه", pos:"GK", price:5, rating:72, tier:3, club:"موناكو"},
+  {name:"فيليب يوريتشيتش", pos:"GK", price:8, rating:75, tier:3, club:"يوفنتوس"},
+  {name:"ألفونس أريولا", pos:"GK", price:13, rating:78, tier:3, club:"وست هام"},
+
+  // ===================== Extra Defenders =====================
+  {name:"ماركوس أكونيا", pos:"DF", price:14, rating:79, tier:3, club:"إشبيلية"},
+  {name:"نيكولا ميلينكوفيتش سافيتش", pos:"DF", price:22, rating:81, tier:3, club:"يوفنتوس"},
+  {name:"مينامينو تاكومي", pos:"MF", price:9, rating:76, tier:3, club:"مونشنغلادباخ"},
+  {name:"عاطف البنا", pos:"DF", price:5, rating:72, tier:3, club:"الأهلي"},
+  {name:"أحمد فتحي", pos:"DF", price:6, rating:73, tier:3, club:"الأهلي (معتزل)"},
+  {name:"محمد عبد الشافي", pos:"DF", price:5, rating:72, tier:3, club:"الأهلي"},
+  {name:"عمرو السولية", pos:"DF", price:6, rating:73, tier:3, club:"الأهلي"},
+  {name:"أحمد حجازي", pos:"DF", price:7, rating:74, tier:3, club:"الاتحاد السعودي"},
+  {name:"محمود متولي", pos:"DF", price:5, rating:71, tier:3, club:"الأهلي"},
+  {name:"رامي ربيعة", pos:"DF", price:6, rating:73, tier:3, club:"الأهلي"},
+  {name:"دييغو غودين", pos:"DF", price:16, rating:81, tier:3, club:"الأوروغواي (معتزل)"},
+  {name:"جيروم بواتنغ", pos:"DF", price:14, rating:80, tier:3, club:"سالزبورغ (معتزل)"},
+  {name:"مارسيلو", pos:"DF", price:24, rating:83, tier:2, club:"فلومينينسي (معتزل)"},
+  {name:"إيريك غارسيا", pos:"DF", price:16, rating:80, tier:3, club:"برشلونة"},
+  {name:"جوش كيميتش", pos:"DF", price:32, rating:84, tier:2, club:"بايرن ميونخ"},
+  {name:"لوكاس هيرنانديز", pos:"DF", price:20, rating:81, tier:3, club:"باريس سان جيرمان"},
+  {name:"سيرجي جينابري", pos:"MF", price:11, rating:78, tier:3, club:"بايرن ميونخ"},
+  {name:"مالو غوستو", pos:"DF", price:14, rating:79, tier:3, club:"تشيلسي"},
+  {name:"جوليان رايرسون", pos:"DF", price:12, rating:78, tier:3, club:"بوروسيا دورتموند"},
+  {name:"أليخاندرو بالدي", pos:"DF", price:24, rating:82, tier:2, club:"برشلونة"},
+  {name:"كريستوف كابا", pos:"DF", price:9, rating:76, tier:3, club:"موناكو"},
+
+  // ===================== Extra Midfielders =====================
+  {name:"محمد النني", pos:"MF", price:9, rating:76, tier:3, club:"الأهلي"},
+  {name:"طاهر محمد طاهر", pos:"MF", price:8, rating:75, tier:3, club:"الأهلي"},
+  {name:"عمرو السيد", pos:"MF", price:6, rating:73, tier:3, club:"الأهلي"},
+  {name:"أليو ديانج", pos:"MF", price:10, rating:77, tier:3, club:"الأهلي"},
+  {name:"محمد شريف", pos:"FW", price:9, rating:76, tier:3, club:"الزمالك"},
+  {name:"جوردي ألبا", pos:"DF", price:14, rating:79, tier:3, club:"إنتر ميامي"},
+  {name:"سيسك فابريغاس", pos:"MF", price:16, rating:80, tier:3, club:"كومو (معتزل)"},
+  {name:"داني باريخو", pos:"MF", price:12, rating:78, tier:3, club:"فياريال"},
+  {name:"إيدين هازارد", pos:"MF", price:18, rating:81, tier:3, club:"تشيلسي (معتزل)"},
+  {name:"مارتن كيلمان", pos:"MF", price:9, rating:76, tier:3, club:"توتنهام"},
+  {name:"يوري تيليمانس", pos:"MF", price:14, rating:79, tier:3, club:"أستون فيلا"},
+  {name:"سكوت ماكتوميناي", pos:"MF", price:20, rating:81, tier:3, club:"نابولي"},
+  {name:"أدريان راباو", pos:"MF", price:12, rating:78, tier:3, club:"مرسيليا"},
+  {name:"غرانيت تشاكا", pos:"MF", price:14, rating:79, tier:3, club:"باير ليفركوزن"},
+  {name:"إيلي واي", pos:"MF", price:8, rating:75, tier:3, club:"مونبلييه"},
+  {name:"أوريلي تشوامني الثاني", pos:"MF", price:7, rating:74, tier:3, club:"موناكو"},
+  {name:"خواو نيفيش", pos:"MF", price:32, rating:83, tier:2, club:"مانشستر سيتي"},
+  {name:"ريان جرافينبيرخ", pos:"MF", price:24, rating:82, tier:3, club:"ليفربول"},
+  {name:"مارتن سواريز", pos:"MF", price:7, rating:74, tier:3, club:"بنفيكا"},
+  {name:"أنخيل دي ماريا", pos:"MF", price:16, rating:80, tier:3, club:"بنفيكا"},
+  {name:"باولو ديبالا", pos:"MF", price:26, rating:82, tier:3, club:"روما"},
+  {name:"نيكولو باريلا", pos:"MF", price:24, rating:82, tier:3, club:"إنتر ميلان"},
+  {name:"هاكان تشالهان أوغلو", pos:"MF", price:18, rating:81, tier:3, club:"إنتر ميلان"},
+  {name:"سانديرو تونالي", pos:"MF", price:26, rating:82, tier:3, club:"نيوكاسل"},
+  {name:"برايان كريستانتي", pos:"MF", price:9, rating:76, tier:3, club:"روما"},
+
+  // ===================== Extra Forwards =====================
+  {name:"محمد صلاح الأول", pos:"FW", price:5, rating:70, tier:3, club:"بيراميدز"},
+  {name:"طارق حامد", pos:"MF", price:6, rating:73, tier:3, club:"الأهلي"},
+  {name:"مروان محسن", pos:"FW", price:7, rating:74, tier:3, club:"الأهلي"},
+  {name:"أحمد سيد زيزو", pos:"FW", price:8, rating:75, tier:3, club:"الأهلي"},
+  {name:"محمود كهربا", pos:"FW", price:9, rating:76, tier:3, club:"الاتحاد السعودي"},
+  {name:"إمام عاشور", pos:"MF", price:8, rating:75, tier:3, club:"الأهلي"},
+  {name:"لوكا يوفيتش", pos:"FW", price:12, rating:78, tier:3, club:"فولفسبورغ"},
+  {name:"إدينسون كافاني", pos:"FW", price:14, rating:79, tier:3, club:"بوكا جونيورز"},
+  {name:"أليكسندر لاكازيت", pos:"FW", price:16, rating:80, tier:3, club:"ليون"},
+  {name:"جيمي فاردي", pos:"FW", price:12, rating:78, tier:3, club:"ليستر سيتي"},
+  {name:"إيفان توني", pos:"FW", price:24, rating:82, tier:3, club:"إيفرتون"},
+  {name:"دومينيك زولت سولانكي", pos:"FW", price:22, rating:81, tier:3, club:"توتنهام"},
+  {name:"يوسا كاباي", pos:"FW", price:9, rating:76, tier:3, club:"واتفورد"},
+  {name:"جوناثان ديفيد", pos:"FW", price:34, rating:84, tier:2, club:"يوفنتوس"},
+  {name:"لوايس أوبيندا", pos:"FW", price:26, rating:82, tier:3, club:"باريس سان جيرمان"},
+  {name:"إيفان راكيتيتش", pos:"MF", price:10, rating:77, tier:3, club:"هايدوك سبليت (معتزل)"},
+  {name:"جوردان أياو", pos:"FW", price:9, rating:76, tier:3, club:"ليدز يونايتد"},
+  {name:"إيفارتون ريبيرو", pos:"FW", price:8, rating:75, tier:3, club:"فلامنغو"},
+  {name:"غابرييل مارتينيلي", pos:"FW", price:28, rating:83, tier:2, club:"أرسنال"},
+  {name:"إدواردو مندي", pos:"GK", price:16, rating:80, tier:3, club:"الأهلي السعودي"},
+  {name:"كارلوس تيفيز", pos:"FW", price:14, rating:80, tier:3, club:"الأرجنتين (معتزل)"},
+  {name:"خافيير هيرنانديز", pos:"FW", price:12, rating:79, tier:3, club:"لوس أنجلوس غالاكسي"},
+  {name:"لويز أدريانو", pos:"FW", price:9, rating:76, tier:3, club:"البرازيل"},
+  {name:"باولينيو", pos:"MF", price:8, rating:75, tier:3, club:"البرازيل"},
+  {name:"أرين روبن", pos:"FW", price:20, rating:81, tier:3, club:"بايرن ميونخ (معتزل)"},
+  {name:"فرانك ريبيري", pos:"FW", price:18, rating:81, tier:3, club:"بايرن ميونخ (معتزل)"},
+  {name:"باستيان شفاينشتايغر", pos:"MF", price:14, rating:79, tier:3, club:"بايرن ميونخ (معتزل)"},
+  {name:"مسعود أوزيل", pos:"MF", price:16, rating:80, tier:3, club:"أرسنال (معتزل)"},
+  {name:"مانويل نويشتيدتر", pos:"DF", price:10, rating:77, tier:3, club:"ألمانيا (معتزل)"},
 ];
 
 const POS_LABEL = {GK:"حارس مرمى", DF:"مدافع", MF:"وسط", FW:"مهاجم"};
@@ -302,6 +394,14 @@ const LOCAL_SAVE_KEY = "imadpro_local_save";
 const LEADERBOARD_KEY = "imadpro_leaderboard";
 const GUESS_LB_KEY = "imadpro_guess_leaderboard";
 const GUESS_NAME_KEY = "imadpro_guess_name";
+const PLAYER_NAME_KEY = "imadpro_player_name";
+
+function getSavedPlayerName(){
+  try { return localStorage.getItem(PLAYER_NAME_KEY) || ""; } catch (e) { return ""; }
+}
+function savePlayerName(name){
+  try { localStorage.setItem(PLAYER_NAME_KEY, name); } catch (e) {}
+}
 
 let currentLbTab = "auction";
 
@@ -463,7 +563,21 @@ function tryResumeLocalProgress(){
   if (state) return; // an online session already took over
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(LOCAL_SAVE_KEY) || "null"); } catch (e) {}
-  if (!saved || !saved.currentPlayer || saved.status === "finished") return;
+  if (!saved || saved.status === "finished") return;
+
+  if (saved.gameType === "boxes"){
+    if (!saved.boxesOptions1) return;
+    state = saved;
+    normalizeStateArrays();
+    showScreen("screen-boxes-game");
+    $("#boxes-squad1-name").textContent = state.p1Name;
+    $("#boxes-squad2-name").textContent = state.p2Name;
+    renderBoxesSquads();
+    renderBoxesRound();
+    return;
+  }
+
+  if (!saved.currentPlayer) return;
   state = saved;
   normalizeStateArrays();
   $("#squad1-name").textContent = state.p1Name;
@@ -480,6 +594,7 @@ function freshPool(){
 function newState(){
   return {
     mode: null,               // 'ai' | 'local' | 'online'
+    gameType: "auction",       // 'auction' | 'boxes'
     squadSize: 11,             // 11 (مزاد النجوم) or 5 (مزاد الخماسي)
     p1Name: "فريق 1",
     p2Name: "فريق 2",
@@ -500,6 +615,10 @@ function newState(){
     finalScore1: null,
     finalScore2: null,
     winnerText: "",
+    // Lucky Boxes (gameType === 'boxes') fields
+    boxesOptions1: null,       // array of up to 4 player objects for player 1's current round
+    boxesOptions2: null,       // array of up to 4 player objects for player 2's current round
+    boxesStep: "p1",           // 'p1' | 'p2' — whose pick within the round
   };
 }
 
@@ -535,6 +654,7 @@ $("#btn-to-setup").addEventListener("click", () => {
   if (!p1){
     errEl.textContent = "من فضلك اكتب اسمك"; errEl.hidden = false; return;
   }
+  savePlayerName(p1);
 
   if (selectedMode === "online"){
     if (!db){
@@ -556,8 +676,16 @@ $("#btn-to-setup").addEventListener("click", () => {
   state = newState();
   state.mode = selectedMode;
   state.squadSize = selectedSquadSize;
+  state.gameType = selectedGameType;
   state.p1Name = p1;
   state.p2Name = p2;
+
+  if (selectedGameType === "boxes"){
+    state.difficulty = "medium";
+    startBoxesGame();
+    return;
+  }
+
   $("#setup-format-label").textContent = SQUAD_FORMATS[state.squadSize].label;
   showScreen("screen-setup");
 });
@@ -622,6 +750,21 @@ $("#btn-copy-code").addEventListener("click", () => {
   }
 });
 
+$("#btn-share-code").addEventListener("click", () => {
+  if (!roomCode) return;
+  const text = "انضم لغرفتي في IMAD PRO! الرمز: " + roomCode;
+  if (navigator.share){
+    navigator.share({ title: "IMAD PRO", text }).catch(() => {});
+  } else if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = $("#btn-share-code");
+      const original = btn.textContent;
+      btn.textContent = "✅ اتنسخت الرسالة";
+      setTimeout(() => { btn.textContent = original; }, 1600);
+    });
+  }
+});
+
 function joinRoomByCode(code){
   if (!db || !code) return;
   code = code.trim().toUpperCase();
@@ -659,7 +802,7 @@ function loadOpenRooms(){
     const twoHours = 2 * 60 * 60 * 1000;
     snap.forEach(child => {
       const r = child.val();
-      if (r && r.status === "waiting" && r.host && r.host.name && (Date.now() - (r.createdAt || 0) < twoHours)){
+      if (r && !r.guest && r.status !== "finished" && r.host && r.host.name && (Date.now() - (r.createdAt || 0) < twoHours)){
         rooms.push({ code: child.key, hostName: r.host.name, createdAt: r.createdAt || 0 });
       }
     });
@@ -718,10 +861,20 @@ function beginHostSetup(guestName){
   state = newState();
   state.mode = "online";
   state.squadSize = selectedSquadSize;
+  state.gameType = selectedGameType;
   state.p1Name = myOnlineName;
   state.p2Name = guestName;
   $("#squad1-name").textContent = state.p1Name;
   $("#squad2-name").textContent = state.p2Name;
+
+  if (selectedGameType === "boxes"){
+    state.difficulty = "medium";
+    listenForActions();
+    roomRef.update({ status: "playing", settings: { gameType: "boxes", squadSize: state.squadSize } });
+    startBoxesGame();
+    return;
+  }
+
   $("#setup-format-label").textContent = SQUAD_FORMATS[state.squadSize].label;
   showScreen("screen-setup");
 }
@@ -730,11 +883,11 @@ function beginHostSetup(guestName){
 function listenAsGuest(){
   roomRef.child("status").on("value", snap => {
     const status = snap.val();
-    if (status === "playing"){
-      showScreen("screen-game");
-    } else if (status === "finished"){
+    if (status === "finished"){
       showScreen("screen-result");
     }
+    // 'playing' screen selection is handled by the state listener below,
+    // since it needs state.gameType to know which game screen to show.
   });
   roomRef.child("state").on("value", snap => {
     if (!snap.exists()) return;
@@ -742,7 +895,15 @@ function listenAsGuest(){
     normalizeStateArrays();
     if (state.status === "finished"){
       renderResultFromState();
+      showScreen("screen-result");
+    } else if (state.gameType === "boxes"){
+      showScreen("screen-boxes-game");
+      $("#boxes-squad1-name").textContent = state.p1Name;
+      $("#boxes-squad2-name").textContent = state.p2Name;
+      renderBoxesSquads();
+      renderBoxesRound();
     } else if (state.currentPlayer){
+      showScreen("screen-game");
       renderGameFromState();
     }
   });
@@ -782,6 +943,7 @@ function listenForActions(){
     if (!state || state.mode !== "online" || !action) return;
     if (action.type === "bid") placeBid(Number(action.amount) || 1);
     else if (action.type === "surrender") doSurrender();
+    else if (action.type === "box") pickBox(Number(action.amount) || 0);
   });
 }
 
@@ -823,8 +985,17 @@ function tryResumeSession(){
       } else if (room.state){
         state = room.state; normalizeStateArrays();
         listenForActions();
-        if (state.status === "finished"){ renderResultFromState(); showScreen("screen-result"); }
-        else { showScreen("screen-game"); renderGameFromState(); }
+        if (state.status === "finished"){
+          renderResultFromState(); showScreen("screen-result");
+        } else if (state.gameType === "boxes"){
+          showScreen("screen-boxes-game");
+          $("#boxes-squad1-name").textContent = state.p1Name;
+          $("#boxes-squad2-name").textContent = state.p2Name;
+          renderBoxesSquads();
+          renderBoxesRound();
+        } else {
+          showScreen("screen-game"); renderGameFromState();
+        }
       }
     } else {
       showScreen("screen-online");
@@ -1000,6 +1171,8 @@ function updateTurnLine(){
 function updateBidControlsAvailability(){
   const mine = isMyTurn();
   $$("#bid-controls .btn-bid").forEach(b => b.disabled = !mine);
+  $("#custom-bid-input").disabled = !mine;
+  $("#btn-custom-bid").disabled = !mine;
   const canSurrender = state.currentBidder !== null && mine;
   $("#btn-surrender").disabled = !canSurrender;
 }
@@ -1050,6 +1223,149 @@ function onTimeout(){
   }
 }
 
+/* ===================== LUCKY BOXES ENGINE ===================== */
+function startBoxesGame(){
+  state.round = 0;
+  state.squad1 = []; state.squad2 = [];
+  showScreen("screen-boxes-game");
+  $("#boxes-squad1-name").textContent = state.p1Name;
+  $("#boxes-squad2-name").textContent = state.p2Name;
+  renderBoxesSquads();
+  startBoxesRound();
+}
+
+function generateBoxOptions(position, difficulty){
+  const weights = tierWeightFor(difficulty);
+  const candidates = state.pool.filter(p => p.pos === position);
+  const preferred = candidates.filter(p => weights.includes(p.tier));
+  const from = (preferred.length >= 4 ? preferred : candidates);
+  const shuffled = from.slice().sort(() => Math.random() - 0.5);
+  const picks = shuffled.slice(0, Math.min(4, shuffled.length));
+  picks.forEach(p => { state.pool = state.pool.filter(x => x !== p); });
+  return picks;
+}
+
+function startBoxesRound(){
+  if (!state) return;
+  state.round++;
+  if (state.round > currentPositions().length){
+    finishAuction();
+    return;
+  }
+  const position = currentPositions()[state.round - 1];
+  state.boxesOptions1 = generateBoxOptions(position, state.difficulty);
+  state.boxesOptions2 = generateBoxOptions(position, state.difficulty);
+  state.boxesStep = "p1";
+  renderBoxesRound();
+  syncOnlineState();
+  saveLocalProgress();
+}
+
+function isMyBoxesTurn(){
+  if (!state) return false;
+  const step = state.boxesStep;
+  if (state.mode === "ai") return step === "p1";
+  if (state.mode === "local") return true;
+  if (state.mode === "online") return (onlineRole === "host" && step === "p1") || (onlineRole === "guest" && step === "p2");
+  return true;
+}
+
+function renderBoxesRound(){
+  if (!state.boxesOptions1) return;
+  const position = currentPositions()[state.round - 1];
+  $("#boxes-round-num").textContent = state.round;
+  $("#boxes-round-total").textContent = currentPositions().length;
+  $("#boxes-pos-chip").textContent = POS_ICON[position] + " " + POS_LABEL[position];
+
+  const activeName = state.boxesStep === "p1" ? state.p1Name : state.p2Name;
+  const isComputerTurn = state.mode === "ai" && state.boxesStep === "p2";
+  $("#boxes-turn-label").textContent = isComputerTurn ? ("🤖 " + state.p2Name + " بيفكر...") : ("دور: " + activeName);
+  $("#boxes-instruction").textContent = "🎁 اختر صندوقًا";
+
+  $("#boxes-reveal").hidden = true;
+  $("#boxes-grid").hidden = false;
+  const mine = isMyBoxesTurn();
+  $$("#boxes-grid .box-card").forEach(btn => {
+    btn.disabled = !mine;
+    btn.classList.remove("opened");
+  });
+
+  maybeTriggerComputerBoxPick();
+}
+
+function pickBox(idx){
+  if (!state) return;
+  const step = state.boxesStep;
+  const options = step === "p1" ? state.boxesOptions1 : state.boxesOptions2;
+  if (!options || !options[idx]) return;
+  const chosen = options[idx];
+  if (step === "p1") state.squad1.push(chosen); else state.squad2.push(chosen);
+
+  $$("#boxes-grid .box-card").forEach(b => b.disabled = true);
+  renderBoxesReveal(chosen);
+  renderBoxesSquads();
+  syncOnlineState();
+  saveLocalProgress();
+  setTimeout(advanceBoxesStep, 1500);
+}
+
+function renderBoxesReveal(player){
+  $("#boxes-grid").hidden = true;
+  const reveal = $("#boxes-reveal");
+  reveal.hidden = false;
+  const jersey = $("#boxes-reveal-jersey");
+  jersey.textContent = getInitials(player.name);
+  jersey.style.background = colorForName(player.name);
+  $("#boxes-reveal-name").textContent = player.name;
+  $("#boxes-reveal-club").textContent = player.club || "";
+  const badge = $("#boxes-reveal-badge");
+  badge.textContent = player.pos;
+  badge.className = "badge pos-" + player.pos;
+  $("#boxes-reveal-rating").textContent = player.rating || "—";
+}
+
+function advanceBoxesStep(){
+  if (!state) return;
+  if (state.boxesStep === "p1"){
+    state.boxesStep = "p2";
+    renderBoxesRound();
+    syncOnlineState();
+    saveLocalProgress();
+  } else {
+    startBoxesRound();
+  }
+}
+
+function maybeTriggerComputerBoxPick(){
+  if (!state || state.mode !== "ai" || state.boxesStep !== "p2") return;
+  setTimeout(() => {
+    if (!state || state.mode !== "ai" || state.boxesStep !== "p2") return;
+    const options = state.boxesOptions2 || [];
+    if (!options.length) return;
+    const idx = Math.floor(Math.random() * options.length);
+    pickBox(idx);
+  }, 700 + Math.random() * 900);
+}
+
+function renderBoxesSquads(){
+  $("#boxes-squad1-slots").innerHTML = slotTemplate(state.squad1, currentPositions().length);
+  $("#boxes-squad2-slots").innerHTML = slotTemplate(state.squad2, currentPositions().length);
+}
+
+$$("#boxes-grid .box-card").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const idx = Number(btn.dataset.idx);
+    if (state.mode === "online" && onlineRole === "guest") sendOnlineAction("box", idx);
+    else pickBox(idx);
+  });
+});
+
+$("#btn-boxes-home").addEventListener("click", () => {
+  const inGame = state && state.round > 0 && state.status !== "finished";
+  if (inGame && !confirm("هتخرج من صناديق الحظ الحالية وتفقد كل التقدم — متأكد؟")) return;
+  resetToHome();
+});
+
 /* ---------- Bidding ---------- */
 $$("#bid-controls .btn-bid").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -1058,6 +1374,25 @@ $$("#bid-controls .btn-bid").forEach(btn => {
     else placeBid(amt);
   });
 });
+
+function submitCustomBid(){
+  if (!state || !state.currentPlayer) return;
+  const input = $("#custom-bid-input");
+  const target = Number(input.value);
+  if (!target || target <= state.currentBid){
+    showWarning("اكتب رقم أكبر من العرض الحالي");
+    return;
+  }
+  const amount = target - state.currentBid;
+  if (state.mode === "online" && onlineRole === "guest") sendOnlineAction("bid", amount);
+  else placeBid(amount);
+  input.value = "";
+}
+$("#btn-custom-bid").addEventListener("click", submitCustomBid);
+$("#custom-bid-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") submitCustomBid();
+});
+
 $("#btn-surrender").addEventListener("click", () => {
   if (state.mode === "online" && onlineRole === "guest") sendOnlineAction("surrender", 0);
   else doSurrender();
@@ -1189,11 +1524,11 @@ function renderGameFromState(){
   const badge = $("#player-pos-badge");
   badge.textContent = position;
   badge.className = "badge pos-" + position;
-  $("#player-base").textContent = player.price;
   $("#player-rating").textContent = player.rating || "—";
   $("#current-bid").textContent = state.currentBid;
   $("#bidder-line").textContent = state.currentBidder ? ("أعلى عرض من: " + nameOf(state.currentBidder)) : "لا يوجد عرض بعد";
   $("#warn-line").hidden = true;
+  $("#custom-bid-input").value = "";
 
   $("#timer-wrap").style.display = state.timerSetting === 0 ? "none" : "flex";
   if (state.timerSetting !== 0) renderTimer();
@@ -1445,7 +1780,7 @@ function simulateGoals(avgRating){
 function collapseGameConfig(){
   $("#auction-config").hidden = true;
   $("#guess-config").hidden = true;
-  $$("#game-type-grid .option-card").forEach(c => c.classList.remove("selected"));
+  $$("#game-type-grid .cover-card").forEach(c => c.classList.remove("selected"));
 }
 
 function resetToHome(){
@@ -1459,7 +1794,7 @@ function resetToHome(){
   collapseGameConfig();
   $$("#mode-grid .option-card").forEach(c => c.classList.remove("selected"));
   $("#field-p2").hidden = true;
-  $("#input-p1").value = "";
+  $("#input-p1").value = getSavedPlayerName();
   $("#input-p2").value = "";
   selectedMode = null;
   state = null;
@@ -1484,23 +1819,24 @@ $("#tab-lb-guess").addEventListener("click", () => loadLeaderboard("guess"));
 
 /* ===================== GAME TYPE SELECTION ===================== */
 let selectedSquadSize = 11;
+let selectedGameType = "auction"; // 'auction' | 'boxes'
 
-$$("#game-type-grid .option-card").forEach(card => {
+$$("#game-type-grid .cover-card").forEach(card => {
   card.addEventListener("click", () => {
     const game = card.dataset.game;
-    $$("#game-type-grid .option-card").forEach(c => c.classList.remove("selected"));
+    $$("#game-type-grid .cover-card").forEach(c => c.classList.remove("selected"));
     card.classList.add("selected");
 
-    if (game === "auction"){
+    if (game === "auction" || game === "boxes"){
+      selectedGameType = game;
       selectedSquadSize = Number(card.dataset.squad) === 5 ? 5 : 11;
-      $("#auction-config-label").textContent = SQUAD_FORMATS[selectedSquadSize].label;
+      const fmtLabel = SQUAD_FORMATS[selectedSquadSize].label;
+      $("#auction-config-label").textContent = game === "boxes" ? ("🎁 صناديق الحظ — " + fmtLabel) : fmtLabel;
       $("#auction-config").hidden = false;
       $("#guess-config").hidden = true;
       $("#auction-config").scrollIntoView({ behavior: "smooth", block: "start" });
     } else if (game === "guess"){
-      let savedName = "";
-      try { savedName = localStorage.getItem(GUESS_NAME_KEY) || ""; } catch (e) {}
-      $("#guess-input-name").value = savedName;
+      $("#guess-input-name").value = getSavedPlayerName();
       $("#guess-setup-error").hidden = true;
       $$("#guess-rounds-group .pill").forEach(p => p.classList.remove("selected"));
       const defaultPill = $('#guess-rounds-group .pill[data-rounds="10"]');
@@ -1532,7 +1868,7 @@ $("#btn-guess-start").addEventListener("click", () => {
   const errEl = $("#guess-setup-error");
   if (!name){ errEl.textContent = "من فضلك اكتب اسمك"; errEl.hidden = false; return; }
   errEl.hidden = true;
-  try { localStorage.setItem(GUESS_NAME_KEY, name); } catch (e) {}
+  savePlayerName(name);
 
   const shuffled = PLAYERS.slice().sort(() => Math.random() - 0.5);
   guessState = {
@@ -1633,6 +1969,7 @@ $("#btn-guess-home").addEventListener("click", () => {
 });
 
 renderMissionCard();
+$("#input-p1").value = getSavedPlayerName();
 tryResumeSession();
 let hasOnlineSession = false;
 try { hasOnlineSession = !!localStorage.getItem(SESSION_KEY); } catch (e) {}
