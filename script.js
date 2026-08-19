@@ -370,15 +370,25 @@ const SQUAD_FORMATS = {
     label: "مزاد النجوم (11 لاعبًا)",
     positions: ["GK","DF","DF","DF","DF","MF","MF","MF","MF","FW","FW"],
     roles:     ["GK","RB","CB","CB","LB","RM","CM","CM","LM","ST","ST"],
+    // [left%, top%] on the pitch, index-aligned with roles (top = attack, bottom = own goal)
+    coords: [
+      [50,92], [80,75], [60,79], [40,79], [20,75],
+      [80,48], [60,52], [40,52], [20,48],
+      [62,18], [38,18],
+    ],
   },
   5: {
     label: "مزاد الخماسي (5 لاعبين)",
     positions: ["GK","DF","MF","MF","FW"],
     roles:     ["GK","CB","CM","CM","ST"],
+    coords: [
+      [50,88], [50,64], [68,40], [32,40], [50,16],
+    ],
   },
 };
 function currentPositions(){ return SQUAD_FORMATS[(state && state.squadSize) || 11].positions; }
 function currentRoles(){ return SQUAD_FORMATS[(state && state.squadSize) || 11].roles; }
+function currentCoords(){ return SQUAD_FORMATS[(state && state.squadSize) || 11].coords; }
 
 /* ---------- State ---------- */
 let state = null;
@@ -393,6 +403,56 @@ const SESSION_KEY = "imadpro_online_session";
 const LOCAL_SAVE_KEY = "imadpro_local_save";
 const LEADERBOARD_KEY = "imadpro_leaderboard";
 const GUESS_LB_KEY = "imadpro_guess_leaderboard";
+const TOURNAMENT_KEY = "imadpro_tournament";
+
+let tournament = null;        // { size, rounds: [[{a,b,winner}], ...] }
+let tournamentPending = null; // { round, match } — which bracket slot the current game will fill
+
+function saveTournament(){
+  try { localStorage.setItem(TOURNAMENT_KEY, JSON.stringify({ tournament, tournamentPending })); } catch (e) {}
+}
+function loadTournament(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(TOURNAMENT_KEY) || "null");
+    if (saved){ tournament = saved.tournament || null; tournamentPending = saved.tournamentPending || null; }
+  } catch (e) {}
+}
+function clearTournament(){
+  tournament = null; tournamentPending = null;
+  try { localStorage.removeItem(TOURNAMENT_KEY); } catch (e) {}
+}
+
+function shuffleNames(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildTournament(names){
+  const shuffled = shuffleNames(names);
+  const round0 = [];
+  for (let i = 0; i < shuffled.length; i += 2){
+    round0.push({ a: shuffled[i], b: shuffled[i + 1], winner: null });
+  }
+  return { size: names.length, rounds: [round0] };
+}
+
+function maybeAdvanceTournamentRound(){
+  if (!tournament) return;
+  const lastRound = tournament.rounds[tournament.rounds.length - 1];
+  if (!lastRound.every(m => m.winner)) return;
+  if (lastRound.length === 1) return; // champion already decided
+  const winners = lastRound.map(m => m.winner);
+  const nextRound = [];
+  for (let i = 0; i < winners.length; i += 2){
+    nextRound.push({ a: winners[i], b: winners[i + 1], winner: null });
+  }
+  tournament.rounds.push(nextRound);
+}
+
 const GUESS_NAME_KEY = "imadpro_guess_name";
 const PLAYER_NAME_KEY = "imadpro_player_name";
 
@@ -969,6 +1029,10 @@ function listenForActions(){
     if (action.type === "bid") placeBid(Number(action.amount) || 1);
     else if (action.type === "surrender") doSurrender();
     else if (action.type === "box") pickBox(Number(action.amount) || 0);
+    else if (action.type === "boxdeal") doBoxDeal();
+    else if (action.type === "boxnodeal") doBoxNoDeal();
+    else if (action.type === "boxprotect") doBoxProtect();
+    else if (action.type === "boxswap") doBoxSwap();
     else if (action.type === "blindbid"){
       if (state.gameType === "blind" && state.blindBid2 === null){
         state.blindBid2 = Number(action.amount) || 0;
@@ -1263,11 +1327,21 @@ function onTimeout(){
 function startBoxesGame(){
   state.round = 0;
   state.squad1 = []; state.squad2 = [];
+  state.items1 = state.items1 || [];
+  state.items2 = state.items2 || [];
   showScreen("screen-boxes-game");
   $("#boxes-squad1-name").textContent = state.p1Name;
   $("#boxes-squad2-name").textContent = state.p2Name;
   renderBoxesSquads();
   startBoxesRound();
+}
+
+// Roughly 1-in-6 boxes hides a bonus item card instead of/alongside the player.
+function maybeAttachItem(){
+  const roll = Math.random();
+  if (roll < 0.09) return "protect";
+  if (roll < 0.17) return "swap";
+  return null;
 }
 
 function generateBoxOptions(position, difficulty){
@@ -1278,7 +1352,7 @@ function generateBoxOptions(position, difficulty){
   const shuffled = from.slice().sort(() => Math.random() - 0.5);
   const picks = shuffled.slice(0, Math.min(4, shuffled.length));
   picks.forEach(p => { state.pool = state.pool.filter(x => x !== p); });
-  return picks;
+  return picks.map(p => Object.assign({}, p, { boxItem: maybeAttachItem() }));
 }
 
 function startBoxesRound(){
@@ -1292,6 +1366,8 @@ function startBoxesRound(){
   state.boxesOptions1 = generateBoxOptions(position, state.difficulty);
   state.boxesOptions2 = generateBoxOptions(position, state.difficulty);
   state.boxesStep = "p1";
+  state.boxesPhase = "choosing";
+  state.boxesFirstIdx = null;
   renderBoxesRound();
   syncOnlineState();
   saveLocalProgress();
@@ -1306,6 +1382,21 @@ function isMyBoxesTurn(){
   return true;
 }
 
+function myItems(){
+  if (!state) return [];
+  return state.boxesStep === "p1" ? (state.items1 || []) : (state.items2 || []);
+}
+
+function renderItemsBar(){
+  const mine = isMyBoxesTurn();
+  const items = myItems();
+  const hasProtect = mine && items.some(it => it.type === "protect" && !it.used);
+  const hasSwap = mine && items.some(it => it.type === "swap" && !it.used);
+  $("#boxes-items-bar").hidden = !(hasProtect || hasSwap);
+  $("#btn-use-protect").hidden = !hasProtect || state.boxesPhase !== "choosing-second";
+  $("#btn-use-swap").hidden = !hasSwap || state.boxesPhase !== "choosing";
+}
+
 function renderBoxesRound(){
   if (!state.boxesOptions1) return;
   const position = currentPositions()[state.round - 1];
@@ -1316,17 +1407,34 @@ function renderBoxesRound(){
   const activeName = state.boxesStep === "p1" ? state.p1Name : state.p2Name;
   const isComputerTurn = state.mode === "ai" && state.boxesStep === "p2";
   $("#boxes-turn-label").textContent = isComputerTurn ? ("🤖 " + state.p2Name + " بيفكر...") : ("دور: " + activeName);
-  $("#boxes-instruction").textContent = "🎁 اختر صندوقًا";
 
   $("#boxes-reveal").hidden = true;
+  $("#boxes-deal-actions").hidden = true;
+  $("#boxes-item-found").hidden = true;
+  $("#boxes-second-notice").hidden = true;
   $("#boxes-grid").hidden = false;
+  $("#boxes-instruction").textContent = state.boxesPhase === "choosing-second"
+    ? "اختر الصندوق الجاي (إجباري!)"
+    : "افتح صندوقًا واحدًا للبدء";
+
   const mine = isMyBoxesTurn();
-  $$("#boxes-grid .box-card").forEach(btn => {
-    btn.disabled = !mine;
-    btn.classList.remove("opened");
+  const options = state.boxesStep === "p1" ? state.boxesOptions1 : state.boxesOptions2;
+  $$("#boxes-grid .box-card").forEach((btn, i) => {
+    btn.classList.remove("opened-reject");
+    if (state.boxesPhase === "choosing-second" && i === state.boxesFirstIdx){
+      btn.disabled = true;
+      btn.classList.add("opened-reject");
+    } else {
+      btn.disabled = !mine;
+    }
   });
 
+  renderItemsBar();
   maybeTriggerComputerBoxPick();
+}
+
+function itemLabel(type){
+  return type === "protect" ? "🛡️ كارت حماية (50م)" : "🔄 كارت تبديل (100م)";
 }
 
 function pickBox(idx){
@@ -1334,18 +1442,20 @@ function pickBox(idx){
   const step = state.boxesStep;
   const options = step === "p1" ? state.boxesOptions1 : state.boxesOptions2;
   if (!options || !options[idx]) return;
-  const chosen = options[idx];
-  if (step === "p1") state.squad1.push(chosen); else state.squad2.push(chosen);
 
-  $$("#boxes-grid .box-card").forEach(b => b.disabled = true);
-  renderBoxesReveal(chosen);
-  renderBoxesSquads();
-  syncOnlineState();
-  saveLocalProgress();
-  setTimeout(advanceBoxesStep, 1500);
+  if (state.boxesPhase === "choosing"){
+    state.boxesFirstIdx = idx;
+    state.boxesPhase = "revealed-first";
+    renderBoxesReveal(options[idx], true);
+    syncOnlineState();
+    saveLocalProgress();
+  } else if (state.boxesPhase === "choosing-second"){
+    if (idx === state.boxesFirstIdx) return;
+    confirmBoxChoice(idx, true);
+  }
 }
 
-function renderBoxesReveal(player){
+function renderBoxesReveal(player, showDealChoice){
   $("#boxes-grid").hidden = true;
   const reveal = $("#boxes-reveal");
   reveal.hidden = false;
@@ -1358,12 +1468,124 @@ function renderBoxesReveal(player){
   badge.textContent = player.pos;
   badge.className = "badge pos-" + player.pos;
   $("#boxes-reveal-rating").textContent = player.rating || "—";
+
+  const itemLine = $("#boxes-item-found");
+  if (player.boxItem){
+    itemLine.textContent = "🎉 الصندوق فيه كمان " + itemLabel(player.boxItem) + "!";
+    itemLine.hidden = false;
+  } else {
+    itemLine.hidden = true;
+  }
+
+  $("#boxes-deal-actions").hidden = !showDealChoice;
 }
+
+function confirmBoxChoice(idx, mandatory){
+  const step = state.boxesStep;
+  const options = step === "p1" ? state.boxesOptions1 : state.boxesOptions2;
+  const chosen = options[idx];
+  if (!chosen) return;
+
+  if (step === "p1"){
+    state.squad1.push(chosen);
+    if (chosen.boxItem){ state.items1 = state.items1 || []; state.items1.push({ type: chosen.boxItem, used: false }); }
+  } else {
+    state.squad2.push(chosen);
+    if (chosen.boxItem){ state.items2 = state.items2 || []; state.items2.push({ type: chosen.boxItem, used: false }); }
+  }
+
+  renderBoxesReveal(chosen, false);
+  if (mandatory){
+    $("#boxes-second-notice").hidden = true;
+  }
+  renderBoxesSquads();
+  syncOnlineState();
+  saveLocalProgress();
+  setTimeout(advanceBoxesStep, 1500);
+}
+
+function boxesGuestShouldRelay(){
+  return !!(state && state.mode === "online" && onlineRole === "guest");
+}
+
+function doBoxDeal(){
+  if (!state || state.boxesFirstIdx === null) return;
+  confirmBoxChoice(state.boxesFirstIdx, false);
+}
+
+function doBoxNoDeal(){
+  if (!state) return;
+  state.boxesPhase = "choosing-second";
+  $("#boxes-reveal").hidden = true;
+  $("#boxes-grid").hidden = false;
+  $("#boxes-second-notice").hidden = false;
+  $("#boxes-instruction").textContent = "اختر الصندوق الجاي (إجباري!)";
+  const mine = isMyBoxesTurn();
+  $$("#boxes-grid .box-card").forEach((btn, i) => {
+    if (i === state.boxesFirstIdx){ btn.disabled = true; btn.classList.add("opened-reject"); }
+    else { btn.disabled = !mine; btn.classList.remove("opened-reject"); }
+  });
+  renderItemsBar();
+  syncOnlineState();
+  saveLocalProgress();
+}
+
+function doBoxProtect(){
+  if (!state || state.boxesPhase !== "choosing-second") return;
+  const items = myItems();
+  const card = items.find(it => it.type === "protect" && !it.used);
+  if (!card) return;
+  card.used = true;
+  // Cancel the forced second pick — go back and accept the first box after all.
+  confirmBoxChoice(state.boxesFirstIdx, false);
+}
+
+function doBoxSwap(){
+  if (!state || state.boxesPhase !== "choosing") return;
+  const items = myItems();
+  const card = items.find(it => it.type === "swap" && !it.used);
+  if (!card) return;
+  const mySquad = state.boxesStep === "p1" ? state.squad1 : state.squad2;
+  if (!mySquad.length) return;
+  const lastPlayer = mySquad[mySquad.length - 1];
+  const freshPicks = state.pool.filter(p => p.pos === lastPlayer.pos);
+  if (!freshPicks.length) return;
+  const replacement = freshPicks[Math.floor(Math.random() * freshPicks.length)];
+  state.pool = state.pool.filter(p => p !== replacement);
+  mySquad[mySquad.length - 1] = replacement;
+  card.used = true;
+  renderBoxesSquads();
+  renderItemsBar();
+  syncOnlineState();
+  saveLocalProgress();
+}
+
+$("#btn-boxes-deal").addEventListener("click", () => {
+  if (boxesGuestShouldRelay()) sendOnlineAction("boxdeal", 0);
+  else doBoxDeal();
+});
+
+$("#btn-boxes-nodeal").addEventListener("click", () => {
+  if (boxesGuestShouldRelay()) sendOnlineAction("boxnodeal", 0);
+  else doBoxNoDeal();
+});
+
+$("#btn-use-protect").addEventListener("click", () => {
+  if (boxesGuestShouldRelay()) sendOnlineAction("boxprotect", 0);
+  else doBoxProtect();
+});
+
+$("#btn-use-swap").addEventListener("click", () => {
+  if (boxesGuestShouldRelay()) sendOnlineAction("boxswap", 0);
+  else doBoxSwap();
+});
 
 function advanceBoxesStep(){
   if (!state) return;
   if (state.boxesStep === "p1"){
     state.boxesStep = "p2";
+    state.boxesPhase = "choosing";
+    state.boxesFirstIdx = null;
     renderBoxesRound();
     syncOnlineState();
     saveLocalProgress();
@@ -1374,13 +1596,31 @@ function advanceBoxesStep(){
 
 function maybeTriggerComputerBoxPick(){
   if (!state || state.mode !== "ai" || state.boxesStep !== "p2") return;
-  setTimeout(() => {
-    if (!state || state.mode !== "ai" || state.boxesStep !== "p2") return;
-    const options = state.boxesOptions2 || [];
-    if (!options.length) return;
-    const idx = Math.floor(Math.random() * options.length);
-    pickBox(idx);
-  }, 700 + Math.random() * 900);
+  if (state.boxesPhase === "choosing"){
+    setTimeout(() => {
+      if (!state || state.mode !== "ai" || state.boxesStep !== "p2" || state.boxesPhase !== "choosing") return;
+      const options = state.boxesOptions2 || [];
+      if (!options.length) return;
+      const idx = Math.floor(Math.random() * options.length);
+      pickBox(idx);
+      // AI decides Deal/No-Deal: keeps good picks (rating>=82), sometimes rerolls weak ones.
+      setTimeout(() => {
+        if (!state || state.boxesPhase !== "revealed-first") return;
+        const picked = options[idx];
+        if (picked && picked.rating < 82 && Math.random() < 0.5){
+          doBoxNoDeal();
+          setTimeout(() => {
+            if (!state || state.boxesPhase !== "choosing-second") return;
+            const remaining = [0,1,2,3].filter(i => i !== state.boxesFirstIdx);
+            const idx2 = remaining[Math.floor(Math.random() * remaining.length)];
+            confirmBoxChoice(idx2, true);
+          }, 900);
+        } else {
+          doBoxDeal();
+        }
+      }, 900);
+    }, 700 + Math.random() * 900);
+  }
 }
 
 function renderBoxesSquads(){
@@ -1819,13 +2059,33 @@ function slotTemplate(list, targetCount){
 }
 
 function resultSlotTemplate(list){
-  return currentRoles().map((role, i) => {
+  const roles = currentRoles();
+  const coords = currentCoords();
+  const chips = roles.map((role, i) => {
     const p = list[i];
+    const [left, top] = coords[i] || [50, 50];
     if (p){
-      return `<div class="slot filled"><span class="slot-pos">${role}</span><span>${escapeHtml(p.name)}</span><span class="slot-price">${p.price}م</span></div>`;
+      return `<div class="pitch-player" style="left:${left}%;top:${top}%">
+        <div class="pitch-avatar" style="background:${colorForName(p.name)}">${getInitials(p.name)}</div>
+        <span class="pitch-role">${role}</span>
+        <span class="pitch-name">${escapeHtml(p.name)}</span>
+      </div>`;
     }
-    return `<div class="slot"><span class="slot-pos">${role}</span><span>فارغ</span><span></span></div>`;
+    return `<div class="pitch-player empty" style="left:${left}%;top:${top}%">
+      <div class="pitch-avatar empty-avatar">—</div>
+      <span class="pitch-role">${role}</span>
+      <span class="pitch-name">فارغ</span>
+    </div>`;
   }).join("");
+  return `<div class="pitch">
+    <div class="pitch-markings">
+      <div class="pitch-halfway"></div>
+      <div class="pitch-circle"></div>
+      <div class="pitch-box pitch-box-top"></div>
+      <div class="pitch-box pitch-box-bottom"></div>
+    </div>
+    ${chips}
+  </div>`;
 }
 
 function renderSquads(){
@@ -1864,6 +2124,8 @@ function finishAuction(){
   renderResultFromState();
   showScreen("screen-result");
   clearLocalProgress();
+  $("#btn-tournament-continue").hidden = !tournamentPending;
+  $("#btn-replay").hidden = !!tournamentPending;
 
   // Award points once, from whichever browser is authoritative for this match
   // (the sole local browser in ai/local modes, or the host in online mode).
@@ -2064,6 +2326,8 @@ function resetToHome(){
   $("#input-p2").value = "";
   selectedMode = null;
   state = null;
+  $("#btn-tournament-continue").hidden = true;
+  $("#btn-replay").hidden = false;
   renderMissionCard();
 }
 
@@ -2124,126 +2388,4 @@ let selectedGuessRounds = 10;
 
 $$("#guess-rounds-group .pill").forEach(pill => {
   pill.addEventListener("click", () => {
-    selectedGuessRounds = Number(pill.dataset.rounds);
-    $$("#guess-rounds-group .pill").forEach(p => p.classList.remove("selected"));
-    pill.classList.add("selected");
-  });
-});
-
-$("#btn-guess-start").addEventListener("click", () => {
-  const name = $("#guess-input-name").value.trim();
-  const errEl = $("#guess-setup-error");
-  if (!name){ errEl.textContent = "من فضلك اكتب اسمك"; errEl.hidden = false; return; }
-  errEl.hidden = true;
-  savePlayerName(name);
-
-  const shuffled = PLAYERS.slice().sort(() => Math.random() - 0.5);
-  guessState = {
-    name,
-    rounds: selectedGuessRounds,
-    players: shuffled.slice(0, selectedGuessRounds),
-    index: 0,
-    totalScore: 0,
-  };
-  showScreen("screen-guess-game");
-  renderGuessRound();
-});
-
-function renderGuessRound(){
-  const player = guessState.players[guessState.index];
-  $("#guess-round-num").textContent = guessState.index + 1;
-  $("#guess-round-total").textContent = guessState.rounds;
-  $("#guess-score-chip").textContent = guessState.totalScore + " نقطة";
-
-  const jersey = $("#guess-player-jersey");
-  jersey.textContent = getInitials(player.name);
-  jersey.style.background = colorForName(player.name);
-
-  $("#guess-player-name").textContent = player.name;
-  $("#guess-player-club").textContent = player.club || "";
-  const badge = $("#guess-player-pos-badge");
-  badge.textContent = player.pos;
-  badge.className = "badge pos-" + player.pos;
-  $("#guess-player-rating").textContent = player.rating || "—";
-
-  $("#guess-value-input").value = 20;
-  $("#guess-input-wrap").hidden = false;
-  $("#guess-reveal").hidden = true;
-}
-
-$$(".guess-stepper .btn-bid").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const step = Number(btn.dataset.step);
-    const input = $("#guess-value-input");
-    const next = Math.max(0, (Number(input.value) || 0) + step);
-    input.value = next;
-  });
-});
-
-$("#btn-guess-submit").addEventListener("click", () => {
-  const player = guessState.players[guessState.index];
-  const guess = Math.max(0, Number($("#guess-value-input").value) || 0);
-  const actual = player.price;
-  const errPct = actual > 0 ? Math.abs(guess - actual) / actual * 100 : (guess === 0 ? 0 : 100);
-  const roundScore = Math.round(Math.max(0, 100 - errPct * 2));
-  guessState.totalScore += roundScore;
-
-  $("#guess-actual-price").textContent = actual;
-  $("#guess-score-line").textContent = "حصلت على " + roundScore + " نقطة (تخمينك: " + guess + " مليون)";
-  $("#guess-input-wrap").hidden = true;
-  $("#guess-reveal").hidden = false;
-  $("#guess-score-chip").textContent = guessState.totalScore + " نقطة";
-});
-
-$("#btn-guess-next").addEventListener("click", () => {
-  guessState.index++;
-  if (guessState.index >= guessState.rounds){
-    finishGuessGame();
-  } else {
-    renderGuessRound();
-  }
-});
-
-function finishGuessGame(){
-  awardGuessScore(guessState.name, guessState.totalScore);
-  const maxPossible = guessState.rounds * 100;
-  const pct = Math.round((guessState.totalScore / maxPossible) * 100);
-
-  $("#guess-res-name").textContent = guessState.name;
-  $("#guess-res-total").textContent = guessState.totalScore;
-  let verdict;
-  if (pct >= 85) verdict = "🏆 خبير انتقالات حقيقي!";
-  else if (pct >= 60) verdict = "👏 متابع كويس للسوق!";
-  else if (pct >= 35) verdict = "🙂 مش وحش، بس محتاج تتابع أكتر";
-  else verdict = "😅 السوق محتاج منك متابعة أكتر!";
-  $("#guess-res-line").textContent = verdict + " (" + pct + "% من أقصى نتيجة)";
-
-  showScreen("screen-guess-result");
-}
-
-$("#btn-guess-replay").addEventListener("click", () => {
-  guessState = null;
-  showScreen("screen-choose-game");
-  collapseGameConfig();
-});
-
-$("#btn-guess-home").addEventListener("click", () => {
-  const inGame = guessState && guessState.index < guessState.rounds;
-  if (inGame && !confirm("هتخرج من التحدي الحالي وتفقد تقدمك — متأكد؟")) return;
-  guessState = null;
-  showScreen("screen-choose-game");
-  collapseGameConfig();
-});
-
-renderMissionCard();
-$("#input-p1").value = getSavedPlayerName();
-tryResumeSession();
-let hasOnlineSession = false;
-try { hasOnlineSession = !!localStorage.getItem(SESSION_KEY); } catch (e) {}
-if (!hasOnlineSession){
-  tryResumeLocalProgress();
-}
-
-} // end init()
-
-})();
+    selectedG
