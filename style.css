@@ -391,16 +391,68 @@ button{ font-family:'Tajawal', sans-serif; }
 .bid-controls{ display:grid; grid-template-columns: repeat(3,1fr); gap:8px; margin: 10px 0 10px; }
 
 /* ---------- Lucky boxes ---------- */
-.boxes-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap:12px; margin: 14px 0 6px; }
+.boxes-hint{ font-size:11.5px; margin: 4px 0 12px; }
+.boxes-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap:14px; margin: 10px 0 6px; }
 .box-card{
-  aspect-ratio: 1; border-radius:16px; cursor:pointer; transition: 0.15s ease;
-  background: linear-gradient(155deg, var(--panel-2), var(--panel));
+  aspect-ratio: 0.85; border-radius:14px; cursor:pointer; transition: 0.15s ease; padding:10px 6px 12px;
+  background: linear-gradient(160deg, var(--panel-2) 0%, var(--panel) 60%);
   border: 2px solid var(--panel-border);
-  display:flex; align-items:center; justify-content:center;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+  position:relative; overflow:hidden;
+}
+.box-card::before{
+  content:""; position:absolute; inset:0;
+  background: radial-gradient(circle at 50% 20%, rgba(212,175,55,0.12), transparent 60%);
 }
 .box-card:hover:not(:disabled){ border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 10px 22px rgba(212,175,55,0.18); }
-.box-card:disabled{ opacity:0.4; cursor:not-allowed; }
-.box-icon{ font-size:38px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.35)); }
+.box-card:disabled{ opacity:0.35; cursor:not-allowed; }
+.box-card.opened-reject{ opacity:0.35; border-color: var(--red); filter: grayscale(0.6); }
+.box-shield{
+  font-size:34px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+  z-index:1;
+}
+.box-pack-label{
+  font-family:'Cairo',sans-serif; font-weight:900; font-size:11px; letter-spacing:1px;
+  color: var(--gold-light); z-index:1;
+}
+.item-found-line{
+  font-size:12.5px; font-weight:800; color: var(--gold-light);
+  background: rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.3);
+  border-radius:8px; padding:6px 12px; margin: 8px 0;
+}
+.deal-actions{ display:flex; gap:10px; margin-top:14px; }
+.deal-actions .btn{ flex:1; }
+.second-pick-notice{ margin-top:10px; }
+
+/* ---------- Item cards (protect / swap) ---------- */
+.items-bar{ display:flex; align-items:center; gap:8px; padding:12px 16px; flex-wrap:wrap; }
+.items-bar-label{ font-size:12px; color: var(--muted); font-weight:700; }
+.item-chip{
+  font-size:12px; font-weight:800; padding:6px 12px; border-radius:10px;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold)); color:#1a1405; border:none; cursor:pointer;
+}
+.item-chip:hover{ filter: brightness(1.08); }
+
+/* ---------- Friends tournament ---------- */
+.tournament-names-list{ display:flex; flex-direction:column; gap:8px; }
+.tournament-names-list input{
+  background: var(--bg-deep); border:1px solid var(--panel-border); border-radius:10px;
+  padding:10px 12px; color: var(--cream); font-size:13.5px; font-family:'Tajawal',sans-serif;
+}
+.tournament-names-list input:focus{ outline:2px solid var(--gold); border-color: transparent; }
+.tournament-rounds{ display:flex; flex-direction:column; gap:16px; }
+.tournament-round-block .section-title{ margin-bottom:8px; }
+.tournament-match-row{
+  display:flex; align-items:center; gap:8px; background: var(--panel); border:1px solid var(--panel-border);
+  border-radius:12px; padding:10px 12px; margin-bottom:8px;
+}
+.tournament-match-names{ flex:1; font-size:12.5px; color: var(--cream); display:flex; flex-direction:column; gap:2px; }
+.tournament-match-names .winner{ color: var(--win); font-weight:800; }
+.tournament-match-names .loser{ opacity:0.5; text-decoration: line-through; }
+.tournament-match-vs{ font-size:10.5px; color: var(--muted); }
+.tournament-play-btn{ flex-shrink:0; padding:8px 14px; font-size:12px; }
+.tournament-bye{ font-size:11px; color: var(--gold-light); }
+
 .custom-bid-row{ display:flex; gap:8px; margin: 0 0 10px; }
 .custom-bid-row input{
   flex:1; text-align:center; background: var(--bg-deep); border:1px solid var(--panel-border);
@@ -419,6 +471,7 @@ button{ font-family:'Tajawal', sans-serif; }
 
 /* ---------- Squads ---------- */
 .squads-wrap{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+.result-squads-wrap{ display:flex; flex-direction:column; gap:14px; }
 .squad-panel{
   background: var(--panel); border:1px solid var(--panel-border); border-radius: var(--radius-sm);
   padding: 12px; min-width:0;
@@ -435,6 +488,39 @@ button{ font-family:'Tajawal', sans-serif; }
 .slot.filled{ border-style:solid; border-color: var(--panel-border); color: var(--cream); }
 .slot .slot-pos{ font-weight:800; color: var(--gold); min-width:26px; }
 .slot .slot-price{ color: var(--gold-light); font-size:10.5px; white-space:nowrap; }
+
+/* ---------- Formation pitch (result screen) ---------- */
+.pitch{
+  position: relative; width:100%; aspect-ratio: 0.72; border-radius:14px; overflow:hidden;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 8%, transparent 92%, rgba(255,255,255,0.05) 100%),
+    repeating-linear-gradient(0deg, #1f5c3a 0 11.11%, #226540 11.11% 22.22%);
+  border: 1px solid var(--panel-border);
+}
+.pitch-markings{ position:absolute; inset:0; }
+.pitch-halfway{ position:absolute; left:6%; right:6%; top:50%; height:1px; background: rgba(255,255,255,0.35); }
+.pitch-circle{
+  position:absolute; left:50%; top:50%; width:22%; aspect-ratio:1; border-radius:50%;
+  border:1px solid rgba(255,255,255,0.35); transform: translate(-50%,-50%);
+}
+.pitch-box{ position:absolute; left:26%; width:48%; height:14%; border:1px solid rgba(255,255,255,0.35); border-top:none; }
+.pitch-box-top{ top:0; border-top:none; border-bottom:1px solid rgba(255,255,255,0.35); }
+.pitch-box-bottom{ bottom:0; }
+.pitch-player{
+  position:absolute; transform: translate(-50%,-50%); display:flex; flex-direction:column;
+  align-items:center; gap:2px; width:19%; text-align:center; z-index:1;
+}
+.pitch-avatar{
+  width:34px; height:34px; border-radius:50%; font-size:12px; font-weight:900; font-family:'Cairo',sans-serif;
+  color:#fff; display:flex; align-items:center; justify-content:center; border:2px solid rgba(255,255,255,0.55);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.4); text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+.pitch-player.empty .pitch-avatar{ background: rgba(0,0,0,0.35); border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.4); }
+.pitch-role{ font-size:8.5px; font-weight:800; color: var(--gold-light); text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+.pitch-name{
+  font-size:8px; font-weight:700; color:#fff; text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+  max-width:56px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
 
 /* ---------- Result screen ---------- */
 .result-hero{ text-align:center; }
