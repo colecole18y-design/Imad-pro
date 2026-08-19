@@ -31,6 +31,7 @@
       </div>
     </div>
     <button class="icon-btn" id="btn-open-leaderboard" title="لوحة الترتيب">🏆</button>
+    <button class="icon-btn" id="btn-open-tournament" title="بطولة الأصدقاء">🎖️</button>
   </header>
 
   <main id="app">
@@ -265,6 +266,53 @@
       <button class="btn btn-ghost" id="btn-leaderboard-back">‹ رجوع</button>
     </section>
 
+    <!-- ===================== FRIENDS TOURNAMENT: SETUP ===================== -->
+    <section class="screen" id="screen-tournament-setup">
+      <div class="card">
+        <span class="eyebrow">بطولة الأصدقاء</span>
+        <h2>🎖️ اعمل بطولة مع صحابك</h2>
+        <p class="muted">قرعة عشوائية، أدوار إقصائية، وآخر واحد يفضل هو البطل! كل مباراة مزاد سريع خماسي على نفس الجهاز.</p>
+      </div>
+
+      <div class="card">
+        <h3 class="section-title">🔢 عدد اللاعبين</h3>
+        <div class="pill-group" id="tournament-size-group">
+          <button class="pill" data-size="2"><strong>2 لاعبين</strong><small>مباراة واحدة</small></button>
+          <button class="pill" data-size="4"><strong>4 لاعبين</strong><small>نصف نهائي + نهائي</small></button>
+          <button class="pill" data-size="8"><strong>8 لاعبين</strong><small>3 أدوار</small></button>
+          <button class="pill" data-size="16"><strong>16 لاعب</strong><small>4 أدوار</small></button>
+        </div>
+      </div>
+
+      <div class="card" id="tournament-names-card" hidden>
+        <h3 class="section-title">✍️ أسماء اللاعبين</h3>
+        <div id="tournament-names-list" class="tournament-names-list"></div>
+        <p class="error-msg" id="tournament-setup-error" hidden></p>
+      </div>
+
+      <div class="actions-row">
+        <button class="btn btn-ghost" id="btn-tournament-setup-back">‹ رجوع</button>
+        <button class="btn btn-gold btn-block" id="btn-tournament-start" disabled>ابدأ القرعة 🎲</button>
+      </div>
+    </section>
+
+    <!-- ===================== FRIENDS TOURNAMENT: BRACKET ===================== -->
+    <section class="screen" id="screen-tournament-bracket">
+      <div class="card">
+        <span class="eyebrow">بطولة الأصدقاء</span>
+        <h2 id="tournament-bracket-title">🎖️ البطولة جارية</h2>
+      </div>
+
+      <div id="tournament-champion-card" class="card result-hero" hidden>
+        <span class="eyebrow">🏆 البطل</span>
+        <h2 id="tournament-champion-name">—</h2>
+      </div>
+
+      <div id="tournament-rounds" class="tournament-rounds"></div>
+
+      <button class="btn btn-ghost" id="btn-tournament-exit">إنهاء البطولة والرجوع</button>
+    </section>
+
     <!-- ===================== GUESS-THE-PRICE: GAME ===================== -->
     <section class="screen" id="screen-guess-game">
       <div class="game-topbar">
@@ -394,15 +442,22 @@
         <div class="pos-chip" id="boxes-pos-chip">GK</div>
       </div>
 
+      <div class="card items-bar" id="boxes-items-bar" hidden>
+        <span class="items-bar-label">🎫 كروتك:</span>
+        <button class="item-chip" id="btn-use-protect" hidden>🛡️ حماية</button>
+        <button class="item-chip" id="btn-use-swap" hidden>🔄 تبديل</button>
+      </div>
+
       <div class="card spotlight-card">
         <span class="eyebrow" id="boxes-turn-label">دور: —</span>
-        <h2 class="player-name" id="boxes-instruction">🎁 اختر صندوقًا</h2>
+        <h2 class="player-name" id="boxes-instruction">افتح صندوقًا واحدًا للبدء</h2>
+        <p class="muted boxes-hint">اقبله (Deal)، أو جرّب صندوق تاني (No Deal) — لكن لو فتحت التاني بتاخده إجباري ومفيش رجوع للأول!</p>
 
         <div class="boxes-grid" id="boxes-grid">
-          <button class="box-card" data-idx="0"><span class="box-icon">🎁</span></button>
-          <button class="box-card" data-idx="1"><span class="box-icon">🎁</span></button>
-          <button class="box-card" data-idx="2"><span class="box-icon">🎁</span></button>
-          <button class="box-card" data-idx="3"><span class="box-icon">🎁</span></button>
+          <button class="box-card" data-idx="0"><span class="box-shield">🛡️</span><span class="box-pack-label">PACK 1</span></button>
+          <button class="box-card" data-idx="1"><span class="box-shield">🛡️</span><span class="box-pack-label">PACK 2</span></button>
+          <button class="box-card" data-idx="2"><span class="box-shield">🛡️</span><span class="box-pack-label">PACK 3</span></button>
+          <button class="box-card" data-idx="3"><span class="box-shield">🛡️</span><span class="box-pack-label">PACK 4</span></button>
         </div>
 
         <div class="guess-reveal" id="boxes-reveal" hidden>
@@ -413,6 +468,16 @@
             <span class="badge" id="boxes-reveal-badge">—</span>
             <span class="stat-chip">⚡ الطاقة: <strong id="boxes-reveal-rating">0</strong></span>
           </div>
+          <p class="item-found-line" id="boxes-item-found" hidden></p>
+
+          <div class="deal-actions" id="boxes-deal-actions" hidden>
+            <button class="btn btn-gold" id="btn-boxes-deal">✅ قبول (Deal)</button>
+            <button class="btn btn-ghost" id="btn-boxes-nodeal">🔄 جرّب تاني (No Deal)</button>
+          </div>
+        </div>
+
+        <div class="second-pick-notice" id="boxes-second-notice" hidden>
+          <p class="warn-line" style="display:block;">⚠️ اختيارك الجاي إجباري — مفيش رجوع للصندوق الأول!</p>
         </div>
       </div>
 
@@ -544,7 +609,7 @@
         <div class="stats-list" id="stats-list"></div>
       </div>
 
-      <div class="squads-wrap">
+      <div class="result-squads-wrap">
         <div class="squad-panel" id="res-squad-1">
           <div class="squad-head">
             <span class="squad-name" id="res-squad1-name">فريق 1</span>
@@ -559,6 +624,7 @@
         </div>
       </div>
 
+      <button class="btn btn-gold btn-block" id="btn-tournament-continue" hidden>🎖️ متابعة البطولة</button>
       <button class="btn btn-gold btn-block" id="btn-replay">🔄 العب مرة أخرى</button>
     </section>
 
@@ -577,7 +643,7 @@
         <span class="link-text">تابعنا على إنستغرام</span>
         <span class="link-arrow">‹</span>
       </a>
-      <a class="link-row" href="https://www.facebook.com/profile.php?id=61556641468455" target="_blank" rel="noopener">
+      <a class="link-row" href="https://github.com/your-username/your-repo" target="_blank" rel="noopener">
         <span class="link-icon">💻</span>
         <span class="link-text">الكود المصدري</span>
         <span class="link-arrow">‹</span>
