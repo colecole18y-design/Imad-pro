@@ -2388,4 +2388,279 @@ let selectedGuessRounds = 10;
 
 $$("#guess-rounds-group .pill").forEach(pill => {
   pill.addEventListener("click", () => {
-    selectedG
+    selectedGuessRounds = Number(pill.dataset.rounds);
+    $$("#guess-rounds-group .pill").forEach(p => p.classList.remove("selected"));
+    pill.classList.add("selected");
+  });
+});
+
+$("#btn-guess-start").addEventListener("click", () => {
+  const name = $("#guess-input-name").value.trim();
+  const errEl = $("#guess-setup-error");
+  if (!name){ errEl.textContent = "من فضلك اكتب اسمك"; errEl.hidden = false; return; }
+  errEl.hidden = true;
+  savePlayerName(name);
+
+  const shuffled = PLAYERS.slice().sort(() => Math.random() - 0.5);
+  guessState = {
+    name,
+    rounds: selectedGuessRounds,
+    players: shuffled.slice(0, selectedGuessRounds),
+    index: 0,
+    totalScore: 0,
+  };
+  showScreen("screen-guess-game");
+  renderGuessRound();
+});
+
+function renderGuessRound(){
+  const player = guessState.players[guessState.index];
+  $("#guess-round-num").textContent = guessState.index + 1;
+  $("#guess-round-total").textContent = guessState.rounds;
+  $("#guess-score-chip").textContent = guessState.totalScore + " نقطة";
+
+  const jersey = $("#guess-player-jersey");
+  jersey.textContent = getInitials(player.name);
+  jersey.style.background = colorForName(player.name);
+
+  $("#guess-player-name").textContent = player.name;
+  $("#guess-player-club").textContent = player.club || "";
+  const badge = $("#guess-player-pos-badge");
+  badge.textContent = player.pos;
+  badge.className = "badge pos-" + player.pos;
+  $("#guess-player-rating").textContent = player.rating || "—";
+
+  $("#guess-value-input").value = 20;
+  $("#guess-input-wrap").hidden = false;
+  $("#guess-reveal").hidden = true;
+}
+
+$$(".guess-stepper .btn-bid").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const step = Number(btn.dataset.step);
+    const input = $("#guess-value-input");
+    const next = Math.max(0, (Number(input.value) || 0) + step);
+    input.value = next;
+  });
+});
+
+$("#btn-guess-submit").addEventListener("click", () => {
+  const player = guessState.players[guessState.index];
+  const guess = Math.max(0, Number($("#guess-value-input").value) || 0);
+  const actual = player.price;
+  const errPct = actual > 0 ? Math.abs(guess - actual) / actual * 100 : (guess === 0 ? 0 : 100);
+  const roundScore = Math.round(Math.max(0, 100 - errPct * 2));
+  guessState.totalScore += roundScore;
+
+  $("#guess-actual-price").textContent = actual;
+  $("#guess-score-line").textContent = "حصلت على " + roundScore + " نقطة (تخمينك: " + guess + " مليون)";
+  $("#guess-input-wrap").hidden = true;
+  $("#guess-reveal").hidden = false;
+  $("#guess-score-chip").textContent = guessState.totalScore + " نقطة";
+});
+
+$("#btn-guess-next").addEventListener("click", () => {
+  guessState.index++;
+  if (guessState.index >= guessState.rounds){
+    finishGuessGame();
+  } else {
+    renderGuessRound();
+  }
+});
+
+function finishGuessGame(){
+  awardGuessScore(guessState.name, guessState.totalScore);
+  const maxPossible = guessState.rounds * 100;
+  const pct = Math.round((guessState.totalScore / maxPossible) * 100);
+
+  $("#guess-res-name").textContent = guessState.name;
+  $("#guess-res-total").textContent = guessState.totalScore;
+  let verdict;
+  if (pct >= 85) verdict = "🏆 خبير انتقالات حقيقي!";
+  else if (pct >= 60) verdict = "👏 متابع كويس للسوق!";
+  else if (pct >= 35) verdict = "🙂 مش وحش، بس محتاج تتابع أكتر";
+  else verdict = "😅 السوق محتاج منك متابعة أكتر!";
+  $("#guess-res-line").textContent = verdict + " (" + pct + "% من أقصى نتيجة)";
+
+  showScreen("screen-guess-result");
+}
+
+$("#btn-guess-replay").addEventListener("click", () => {
+  guessState = null;
+  showScreen("screen-choose-game");
+  collapseGameConfig();
+});
+
+$("#btn-guess-home").addEventListener("click", () => {
+  const inGame = guessState && guessState.index < guessState.rounds;
+  if (inGame && !confirm("هتخرج من التحدي الحالي وتفقد تقدمك — متأكد؟")) return;
+  guessState = null;
+  showScreen("screen-choose-game");
+  collapseGameConfig();
+});
+
+/* ===================== FRIENDS TOURNAMENT ===================== */
+let selectedTournamentSize = null;
+
+$("#btn-open-tournament").addEventListener("click", () => {
+  if (tournament){
+    showScreen("screen-tournament-bracket");
+    renderTournamentBracket();
+  } else {
+    resetTournamentSetupUI();
+    showScreen("screen-tournament-setup");
+  }
+});
+
+function resetTournamentSetupUI(){
+  selectedTournamentSize = null;
+  $$("#tournament-size-group .pill").forEach(p => p.classList.remove("selected"));
+  $("#tournament-names-card").hidden = true;
+  $("#tournament-names-list").innerHTML = "";
+  $("#tournament-setup-error").hidden = true;
+  $("#btn-tournament-start").disabled = true;
+}
+
+$$("#tournament-size-group .pill").forEach(pill => {
+  pill.addEventListener("click", () => {
+    selectedTournamentSize = Number(pill.dataset.size);
+    $$("#tournament-size-group .pill").forEach(p => p.classList.remove("selected"));
+    pill.classList.add("selected");
+    renderTournamentNameInputs(selectedTournamentSize);
+    $("#tournament-names-card").hidden = false;
+    $("#tournament-setup-error").hidden = true;
+    $("#btn-tournament-start").disabled = false;
+  });
+});
+
+function renderTournamentNameInputs(n){
+  const el = $("#tournament-names-list");
+  el.innerHTML = "";
+  const savedName = getSavedPlayerName();
+  for (let i = 0; i < n; i++){
+    const input = document.createElement("input");
+    input.type = "text";
+    input.maxLength = 16;
+    input.placeholder = "اسم اللاعب " + (i + 1);
+    if (i === 0 && savedName) input.value = savedName;
+    el.appendChild(input);
+  }
+}
+
+$("#btn-tournament-setup-back").addEventListener("click", () => showScreen("screen-choose-game"));
+
+$("#btn-tournament-start").addEventListener("click", () => {
+  const inputs = $$("#tournament-names-list input");
+  const names = inputs.map(i => i.value.trim());
+  const errEl = $("#tournament-setup-error");
+  if (names.some(n => !n)){ errEl.textContent = "اكتب كل الأسماء أولاً"; errEl.hidden = false; return; }
+  if (new Set(names).size !== names.length){ errEl.textContent = "الأسماء لازم تكون مختلفة عن بعض"; errEl.hidden = false; return; }
+  errEl.hidden = true;
+  tournament = buildTournament(names);
+  tournamentPending = null;
+  saveTournament();
+  showScreen("screen-tournament-bracket");
+  renderTournamentBracket();
+});
+
+function roundLabel(round, roundIndex){
+  if (round.length === 1) return "🏆 النهائي";
+  if (round.length === 2) return "نصف النهائي";
+  if (round.length === 4) return "ربع النهائي";
+  return "الدور " + (roundIndex + 1);
+}
+
+function renderTournamentBracket(){
+  if (!tournament) return;
+  const lastRound = tournament.rounds[tournament.rounds.length - 1];
+  const isChampion = lastRound.length === 1 && !!lastRound[0].winner;
+
+  const champCard = $("#tournament-champion-card");
+  if (isChampion){
+    champCard.hidden = false;
+    $("#tournament-champion-name").textContent = "🏆 " + lastRound[0].winner;
+  } else {
+    champCard.hidden = true;
+  }
+
+  $("#tournament-rounds").innerHTML = tournament.rounds.map((round, rIdx) => {
+    const label = roundLabel(round, rIdx);
+    const matchesHtml = round.map((m, mIdx) => {
+      const aCls = m.winner ? (m.winner === m.a ? "winner" : "loser") : "";
+      const bCls = m.winner ? (m.winner === m.b ? "winner" : "loser") : "";
+      const playBtn = m.winner ? "" :
+        `<button class="btn btn-bid tournament-play-btn" data-round="${rIdx}" data-match="${mIdx}">▶ ابدأ</button>`;
+      return `
+        <div class="tournament-match-row">
+          <div class="tournament-match-names">
+            <span class="${aCls}">${escapeHtml(m.a)}</span>
+            <span class="tournament-match-vs">vs</span>
+            <span class="${bCls}">${escapeHtml(m.b)}</span>
+          </div>
+          ${playBtn}
+        </div>`;
+    }).join("");
+    return `<div class="tournament-round-block"><h3 class="section-title">${label}</h3>${matchesHtml}</div>`;
+  }).join("");
+
+  $$(".tournament-play-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      startTournamentMatch(Number(btn.dataset.round), Number(btn.dataset.match));
+    });
+  });
+}
+
+function startTournamentMatch(r, m){
+  const match = tournament.rounds[r][m];
+  if (!match || match.winner) return;
+  tournamentPending = { round: r, match: m };
+  saveTournament();
+
+  state = newState();
+  state.mode = "local";
+  state.gameType = "auction";
+  state.squadSize = 5;
+  state.difficulty = "medium";
+  state.timerSetting = 0;
+  state.budget = 300;
+  state.budget1 = 300; state.budget2 = 300;
+  state.p1Name = match.a;
+  state.p2Name = match.b;
+  startAuction();
+}
+
+$("#btn-tournament-continue").addEventListener("click", () => {
+  if (!tournamentPending || !tournament || !state) return;
+  const { round, match } = tournamentPending;
+  const m = tournament.rounds[round][match];
+  const winnerName = state.finalScore1 === state.finalScore2
+    ? (Math.random() < 0.5 ? state.p1Name : state.p2Name)
+    : (state.finalScore1 > state.finalScore2 ? state.p1Name : state.p2Name);
+  m.winner = winnerName;
+  maybeAdvanceTournamentRound();
+  tournamentPending = null;
+  saveTournament();
+  state = null;
+  showScreen("screen-tournament-bracket");
+  renderTournamentBracket();
+});
+
+$("#btn-tournament-exit").addEventListener("click", () => {
+  if (!confirm("هتنهي البطولة الحالية والتقدم هيتمسح — متأكد؟")) return;
+  clearTournament();
+  showScreen("screen-choose-game");
+});
+
+renderMissionCard();
+$("#input-p1").value = getSavedPlayerName();
+loadTournament();
+tryResumeSession();
+let hasOnlineSession = false;
+try { hasOnlineSession = !!localStorage.getItem(SESSION_KEY); } catch (e) {}
+if (!hasOnlineSession){
+  tryResumeLocalProgress();
+}
+
+} // end init()
+
+})();
